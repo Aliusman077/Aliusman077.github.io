@@ -4,7 +4,7 @@ name: Deploy Flutter web to Pages
 
 on:
   push:
-    branches: [main]
+    branches: [main, master]
 
 permissions:
   contents: read
