@@ -10,6 +10,11 @@ const String kPortfolioLinkedInUrl =
 const String kPortfolioLocation = 'Islamabad, Pakistan';
 
 const String kHeroName = 'Ali Usman';
+/// Hero / nav split (reference: first part light, accent part teal).
+const String kHeroNameFirst = 'Ali ';
+const String kHeroNameAccent = 'Usman';
+const String kBrandFirst = 'Ali ';
+const String kBrandAccent = 'Usman.';
 const String kHeroRole = 'Android Engineer';
 const String kHeroTagline =
     'Designing and shipping high-performance Android applications with Kotlin, Jetpack Compose, '

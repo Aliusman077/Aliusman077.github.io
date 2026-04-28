@@ -7,9 +7,16 @@ import 'package:url_launcher/url_launcher.dart';
 import 'portfolio_data.dart';
 
 /// Single-page portfolio with anchored sections (Flutter web), inspired by
-/// https://khanusman1269.github.io — scroll-linked nav, cards, and entrance motion.
+/// https://khanusman1269.github.io — top bar, centered hero, scroll-linked nav.
 class PortfolioPage extends StatefulWidget {
-  const PortfolioPage({super.key});
+  const PortfolioPage({
+    super.key,
+    required this.isDarkMode,
+    required this.onToggleTheme,
+  });
+
+  final bool isDarkMode;
+  final VoidCallback onToggleTheme;
 
   @override
   State<PortfolioPage> createState() => _PortfolioPageState();
@@ -53,108 +60,113 @@ class _PortfolioPageState extends State<PortfolioPage> {
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     const muted = Color(0xFF8B9BB4);
+    final navBg = isDark ? const Color(0xEE0A0E14) : Colors.white;
+    final navBorder = isDark ? const Color(0x14FFFFFF) : const Color(0x14000000);
 
     return Scaffold(
-      body: CustomScrollView(
-        controller: _scroll,
-        slivers: [
-          SliverLayoutBuilder(
-            builder: (context, constraints) {
-              final wide = constraints.crossAxisExtent > 720;
-              return SliverAppBar.large(
-                pinned: true,
-                backgroundColor: const Color(0xDD0A0E14),
-                surfaceTintColor: Colors.transparent,
-                title: Text(
-                  kHeroName,
-                  style: TextStyle(
-                    fontWeight: FontWeight.w700,
-                    color: cs.onSurface,
-                    letterSpacing: -0.5,
-                  ),
-                ),
-                actions: [
-                  if (wide) ...[
-                    _NavText('About', () => _scrollTo(_kAbout)),
-                    _NavText('Journey', () => _scrollTo(_kJourney)),
-                    _NavText('Projects', () => _scrollTo(_kProjects)),
-                    _NavText('Skills', () => _scrollTo(_kSkills)),
-                    _NavText('Education', () => _scrollTo(_kEducation)),
-                    _NavText('Connect', () => _scrollTo(_kConnect)),
-                    const SizedBox(width: 12),
-                  ],
-                ],
-              );
-            },
-          ),
-          if (MediaQuery.sizeOf(context).width <= 720)
-            SliverToBoxAdapter(
-              child: Padding(
-                padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
-                child: Wrap(
-                  spacing: 4,
-                  runSpacing: 4,
-                  children: [
-                    _ChipNav('About', () => _scrollTo(_kAbout)),
-                    _ChipNav('Journey', () => _scrollTo(_kJourney)),
-                    _ChipNav('Projects', () => _scrollTo(_kProjects)),
-                    _ChipNav('Skills', () => _scrollTo(_kSkills)),
-                    _ChipNav('Education', () => _scrollTo(_kEducation)),
-                    _ChipNav('Connect', () => _scrollTo(_kConnect)),
+      body: LayoutBuilder(
+        builder: (context, constraints) {
+          final wide = constraints.maxWidth >= 1000;
+          return Column(
+            children: [
+              _PortfolioNavBar(
+                wide: wide,
+                navBg: navBg,
+                navBorder: navBorder,
+                isDarkMode: widget.isDarkMode,
+                onToggleTheme: widget.onToggleTheme,
+                onHome: () => _scrollTo(_kHero),
+                onAbout: () => _scrollTo(_kAbout),
+                onExperience: () => _scrollTo(_kJourney),
+                onProjects: () => _scrollTo(_kProjects),
+                onSkills: () => _scrollTo(_kSkills),
+                onEducation: () => _scrollTo(_kEducation),
+                onContact: () => _scrollTo(_kConnect),
+                onGetInTouch: () => _scrollTo(_kConnect),
+              ),
+              Expanded(
+                child: CustomScrollView(
+                  controller: _scroll,
+                  slivers: [
+                    if (!wide)
+                      SliverToBoxAdapter(
+                        child: Padding(
+                          padding: const EdgeInsets.fromLTRB(12, 8, 12, 0),
+                          child: Wrap(
+                            spacing: 4,
+                            runSpacing: 4,
+                            alignment: WrapAlignment.center,
+                            children: [
+                              _ChipNav('About', () => _scrollTo(_kAbout)),
+                              _ChipNav('Experience', () => _scrollTo(_kJourney)),
+                              _ChipNav('Projects', () => _scrollTo(_kProjects)),
+                              _ChipNav('Skills', () => _scrollTo(_kSkills)),
+                              _ChipNav('Education', () => _scrollTo(_kEducation)),
+                              _ChipNav('Contact', () => _scrollTo(_kConnect)),
+                            ],
+                          ),
+                        ),
+                      ),
+                    SliverToBoxAdapter(
+                      child: Center(
+                        child: ConstrainedBox(
+                          constraints: const BoxConstraints(maxWidth: 1100),
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 20),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.stretch,
+                              children: [
+                                _Hero(
+                                  key: _kHero,
+                                  cs: cs,
+                                  muted: muted,
+                                  onWork: () => _scrollTo(_kProjects),
+                                  onContact: () => _scrollTo(_kConnect),
+                                  onLinkedIn: () => _openUri(kPortfolioLinkedInUrl),
+                                  onGithub: () => _openUri('https://github.com/$kPortfolioGithubUser'),
+                                  onEmail: () => _openUri('mailto:$kPortfolioEmail'),
+                                  onScrollDown: () => _scrollTo(_kAbout),
+                                ),
+                                const _SectionGap(),
+                                _AboutSection(key: _kAbout),
+                                const _SectionGap(),
+                                _JourneySection(key: _kJourney),
+                                const _SectionGap(),
+                                _ProjectsSection(key: _kProjects),
+                                const _SectionGap(),
+                                _SkillsSection(key: _kSkills),
+                                const _SectionGap(),
+                                _EducationSection(key: _kEducation),
+                                const _SectionGap(),
+                                _ConnectSection(
+                                  key: _kConnect,
+                                  muted: muted,
+                                  onGithub: () => _openUri('https://github.com/$kPortfolioGithubUser'),
+                                  onLinkedIn: () => _openUri(kPortfolioLinkedInUrl),
+                                  onEmail: () => _openUri('mailto:$kPortfolioEmail'),
+                                  onPhone: () => _openUri('tel:$kPortfolioPhoneTel'),
+                                ),
+                                const SizedBox(height: 48),
+                                Text(
+                                  '© ${DateTime.now().year} $kHeroName · Flutter · GitHub Pages',
+                                  textAlign: TextAlign.center,
+                                  style: const TextStyle(color: muted, fontSize: 13),
+                                ),
+                                const SizedBox(height: 32),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
                   ],
                 ),
               ),
-            ),
-          SliverToBoxAdapter(
-            child: Center(
-              child: ConstrainedBox(
-                constraints: const BoxConstraints(maxWidth: 1100),
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 20),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      _Hero(
-                        key: _kHero,
-                        cs: cs,
-                        muted: muted,
-                        onWork: () => _scrollTo(_kProjects),
-                        onContact: () => _scrollTo(_kConnect),
-                      ),
-                      const _SectionGap(),
-                      _AboutSection(key: _kAbout),
-                      const _SectionGap(),
-                      _JourneySection(key: _kJourney),
-                      const _SectionGap(),
-                      _ProjectsSection(key: _kProjects),
-                      const _SectionGap(),
-                      _SkillsSection(key: _kSkills),
-                      const _SectionGap(),
-                      _EducationSection(key: _kEducation),
-                      const _SectionGap(),
-                      _ConnectSection(
-                        key: _kConnect,
-                        muted: muted,
-                        onGithub: () => _openUri('https://github.com/$kPortfolioGithubUser'),
-                        onLinkedIn: () => _openUri(kPortfolioLinkedInUrl),
-                        onEmail: () => _openUri('mailto:$kPortfolioEmail'),
-                        onPhone: () => _openUri('tel:$kPortfolioPhoneTel'),
-                      ),
-                      const SizedBox(height: 48),
-                      Text(
-                        '© ${DateTime.now().year} $kHeroName · Flutter · GitHub Pages',
-                        textAlign: TextAlign.center,
-                        style: const TextStyle(color: muted, fontSize: 13),
-                      ),
-                      const SizedBox(height: 32),
-                    ],
-                  ),
-                ),
-              ),
-            ),
-          ),
-        ],
+            ],
+          );
+        },
       ),
     );
   }
@@ -167,16 +179,139 @@ class _SectionGap extends StatelessWidget {
   Widget build(BuildContext context) => const SizedBox(height: 40);
 }
 
-class _NavText extends StatelessWidget {
-  const _NavText(this.label, this.onTap);
+/// Reference-style top bar: split brand, centered links, theme toggle, CTA.
+class _PortfolioNavBar extends StatelessWidget {
+  const _PortfolioNavBar({
+    required this.wide,
+    required this.navBg,
+    required this.navBorder,
+    required this.isDarkMode,
+    required this.onToggleTheme,
+    required this.onHome,
+    required this.onAbout,
+    required this.onExperience,
+    required this.onProjects,
+    required this.onSkills,
+    required this.onEducation,
+    required this.onContact,
+    required this.onGetInTouch,
+  });
+
+  final bool wide;
+  final Color navBg;
+  final Color navBorder;
+  final bool isDarkMode;
+  final VoidCallback onToggleTheme;
+  final VoidCallback onHome;
+  final VoidCallback onAbout;
+  final VoidCallback onExperience;
+  final VoidCallback onProjects;
+  final VoidCallback onSkills;
+  final VoidCallback onEducation;
+  final VoidCallback onContact;
+  final VoidCallback onGetInTouch;
+
+  @override
+  Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    final navMuted = Color.lerp(cs.onSurface, cs.surface, isDarkMode ? 0.35 : 0.45)!;
+
+    return Material(
+      color: navBg,
+      child: Container(
+        height: 72,
+        decoration: BoxDecoration(
+          border: Border(bottom: BorderSide(color: navBorder)),
+          boxShadow: isDarkMode
+              ? null
+              : [
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.06),
+                    blurRadius: 12,
+                    offset: const Offset(0, 4),
+                  ),
+                ],
+        ),
+        padding: const EdgeInsets.symmetric(horizontal: 16),
+        child: Row(
+          children: [
+            InkWell(
+              onTap: onHome,
+              borderRadius: BorderRadius.circular(8),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 4),
+                child: Text.rich(
+                  TextSpan(
+                    style: const TextStyle(fontSize: 19, fontWeight: FontWeight.w700, letterSpacing: -0.35),
+                    children: [
+                      TextSpan(text: kBrandFirst, style: TextStyle(color: cs.onSurface)),
+                      TextSpan(text: kBrandAccent, style: TextStyle(color: cs.primary)),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+            if (wide)
+              Expanded(
+                child: SingleChildScrollView(
+                  scrollDirection: Axis.horizontal,
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      _TopNavLink('Home', onHome, navMuted),
+                      _TopNavLink('About', onAbout, navMuted),
+                      _TopNavLink('Experience', onExperience, navMuted),
+                      _TopNavLink('Projects', onProjects, navMuted),
+                      _TopNavLink('Skills', onSkills, navMuted),
+                      _TopNavLink('Education', onEducation, navMuted),
+                      _TopNavLink('Contact', onContact, navMuted),
+                    ],
+                  ),
+                ),
+              )
+            else
+              const Spacer(),
+            IconButton(
+              tooltip: isDarkMode ? 'Light mode' : 'Dark mode',
+              onPressed: onToggleTheme,
+              icon: Icon(
+                isDarkMode ? Icons.dark_mode_outlined : Icons.light_mode_outlined,
+                color: cs.onSurface.withValues(alpha: 0.88),
+              ),
+            ),
+            const SizedBox(width: 4),
+            FilledButton(
+              onPressed: onGetInTouch,
+              style: FilledButton.styleFrom(
+                padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 12),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+              ),
+              child: const Text('Get In Touch'),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _TopNavLink extends StatelessWidget {
+  const _TopNavLink(this.label, this.onTap, this.color);
   final String label;
   final VoidCallback onTap;
+  final Color color;
 
   @override
   Widget build(BuildContext context) {
     return TextButton(
       onPressed: onTap,
-      child: Text(label, style: const TextStyle(fontWeight: FontWeight.w500, fontSize: 14)),
+      style: TextButton.styleFrom(
+        foregroundColor: color,
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+        minimumSize: Size.zero,
+        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+      ),
+      child: Text(label, style: TextStyle(fontWeight: FontWeight.w500, fontSize: 14, color: color)),
     );
   }
 }
@@ -232,12 +367,20 @@ class _Hero extends StatefulWidget {
     required this.muted,
     required this.onWork,
     required this.onContact,
+    required this.onLinkedIn,
+    required this.onGithub,
+    required this.onEmail,
+    required this.onScrollDown,
   });
 
   final ColorScheme cs;
   final Color muted;
   final VoidCallback onWork;
   final VoidCallback onContact;
+  final VoidCallback onLinkedIn;
+  final VoidCallback onGithub;
+  final VoidCallback onEmail;
+  final VoidCallback onScrollDown;
 
   @override
   State<_Hero> createState() => _HeroState();
@@ -263,14 +406,18 @@ class _HeroState extends State<_Hero> with SingleTickerProviderStateMixin {
   Widget build(BuildContext context) {
     final cs = widget.cs;
     final muted = widget.muted;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final heroBorder = isDark ? const Color(0x14FFFFFF) : const Color(0x14000000);
+    final roleColor = Color.lerp(muted, cs.onSurface, 0.55)!;
     final headlineStyle = Theme.of(context).textTheme.displaySmall?.copyWith(
           fontWeight: FontWeight.w800,
           letterSpacing: -1,
-        );
+        ) ??
+        const TextStyle(fontSize: 36, fontWeight: FontWeight.w800, letterSpacing: -1);
 
     return Container(
-      decoration: const BoxDecoration(
-        border: Border(bottom: BorderSide(color: Color(0x14FFFFFF))),
+      decoration: BoxDecoration(
+        border: Border(bottom: BorderSide(color: heroBorder)),
       ),
       child: Stack(
         clipBehavior: Clip.none,
@@ -281,6 +428,7 @@ class _HeroState extends State<_Hero> with SingleTickerProviderStateMixin {
               builder: (context, _) {
                 final t = CurvedAnimation(parent: _ambient, curve: Curves.easeInOutCubic).value;
                 final topGlow = Color.lerp(const Color(0x243DD6C6), const Color(0x423DD6C6), t)!;
+                final fadeBottom = isDark ? const Color(0x000A0E14) : cs.surface.withValues(alpha: 0.2);
                 return DecoratedBox(
                   decoration: BoxDecoration(
                     gradient: LinearGradient(
@@ -288,7 +436,7 @@ class _HeroState extends State<_Hero> with SingleTickerProviderStateMixin {
                       end: Alignment.bottomRight,
                       colors: [
                         topGlow,
-                        const Color(0x000A0E14),
+                        fadeBottom,
                       ],
                     ),
                   ),
@@ -297,80 +445,184 @@ class _HeroState extends State<_Hero> with SingleTickerProviderStateMixin {
             ),
           ),
           Padding(
-            padding: const EdgeInsets.only(top: 8, bottom: 40),
+            padding: const EdgeInsets.fromLTRB(12, 28, 12, 36),
             child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                Text(kHeroName, style: headlineStyle)
+                Text.rich(
+                  TextSpan(
+                    children: [
+                      TextSpan(text: kHeroNameFirst, style: headlineStyle.copyWith(color: cs.onSurface)),
+                      TextSpan(text: kHeroNameAccent, style: headlineStyle.copyWith(color: cs.primary)),
+                    ],
+                  ),
+                  textAlign: TextAlign.center,
+                )
                     .animate()
                     .fadeIn(duration: 550.ms, curve: Curves.easeOutCubic)
-                    .slideX(begin: -0.04, end: 0, curve: Curves.easeOutCubic),
-                const SizedBox(height: 8),
+                    .slideY(begin: 0.06, end: 0, curve: Curves.easeOutCubic),
+                const SizedBox(height: 12),
                 Text(
                   '$kHeroRole · $kPortfolioLocation',
+                  textAlign: TextAlign.center,
                   style: TextStyle(
-                    fontSize: 18,
-                    color: cs.primary,
-                    fontWeight: FontWeight.w600,
+                    fontSize: 17,
+                    color: roleColor,
+                    fontWeight: FontWeight.w500,
                     height: 1.45,
                   ),
                 )
                     .animate()
                     .fadeIn(delay: 90.ms, duration: 500.ms)
-                    .slideY(begin: 0.08, end: 0, curve: Curves.easeOutCubic)
-                    .then(delay: 350.ms)
-                    .shimmer(
-                      duration: 2200.ms,
-                      color: cs.primary.withValues(alpha: 0.22),
-                    ),
-                const SizedBox(height: 10),
+                    .slideY(begin: 0.08, end: 0, curve: Curves.easeOutCubic),
+                const SizedBox(height: 12),
                 Text(
                   kHeroTagline,
-                  style: TextStyle(fontSize: 17, color: muted, height: 1.5),
+                  textAlign: TextAlign.center,
+                  style: TextStyle(fontSize: 16, color: muted, height: 1.55),
                 )
                     .animate()
                     .fadeIn(delay: 160.ms, duration: 550.ms)
                     .slideY(begin: 0.1, end: 0, curve: Curves.easeOutCubic),
-                const SizedBox(height: 12),
+                const SizedBox(height: 14),
                 Text(
                   kHeroStatsLine,
-                  style: TextStyle(color: muted.withValues(alpha: 0.95), fontSize: 15, height: 1.4),
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    color: cs.primary,
+                    fontSize: 15,
+                    fontWeight: FontWeight.w600,
+                    height: 1.4,
+                  ),
                 )
                     .animate()
                     .fadeIn(delay: 220.ms, duration: 500.ms)
                     .then(delay: 200.ms)
                     .shimmer(
                       duration: 2600.ms,
-                      color: const Color(0xFF3DD6C6).withValues(alpha: 0.2),
+                      color: cs.primary.withValues(alpha: 0.25),
                     ),
-                const SizedBox(height: 24),
+                const SizedBox(height: 28),
                 Wrap(
-                  spacing: 12,
-                  runSpacing: 12,
+                  alignment: WrapAlignment.center,
+                  spacing: 14,
+                  runSpacing: 14,
                   children: [
                     FilledButton(
                       onPressed: widget.onWork,
                       style: FilledButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(horizontal: 22, vertical: 14),
+                        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
                       ),
-                      child: const Text('View my work'),
+                      child: const Text('View My Work'),
                     ),
                     OutlinedButton(
                       onPressed: widget.onContact,
                       style: OutlinedButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(horizontal: 22, vertical: 14),
+                        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
+                        foregroundColor: cs.onSurface,
+                        side: BorderSide(color: cs.onSurface.withValues(alpha: 0.35)),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
                       ),
-                      child: const Text('Contact me'),
+                      child: const Text('Contact Me'),
                     ),
                   ],
                 ).animate().fadeIn(delay: 300.ms, duration: 450.ms).scale(
                       begin: const Offset(0.96, 0.96),
                       curve: Curves.easeOutBack,
                     ),
+                const SizedBox(height: 28),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    _HeroSocialIcon(
+                      tooltip: 'LinkedIn',
+                      icon: Icons.work_outline_rounded,
+                      onTap: widget.onLinkedIn,
+                    ),
+                    _HeroSocialIcon(
+                      tooltip: 'GitHub',
+                      icon: Icons.code_rounded,
+                      onTap: widget.onGithub,
+                    ),
+                    _HeroSocialIcon(
+                      tooltip: 'Email',
+                      icon: Icons.mail_outline_rounded,
+                      onTap: widget.onEmail,
+                    ),
+                  ],
+                )
+                    .animate()
+                    .fadeIn(delay: 380.ms, duration: 450.ms)
+                    .slideY(begin: 0.12, end: 0, curve: Curves.easeOutCubic),
+                const SizedBox(height: 36),
+                _ScrollDownCue(onTap: widget.onScrollDown, color: cs.primary)
+                    .animate()
+                    .fadeIn(delay: 520.ms, duration: 500.ms)
+                    .scale(begin: const Offset(0.85, 0.85), curve: Curves.easeOutBack),
               ],
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+class _HeroSocialIcon extends StatelessWidget {
+  const _HeroSocialIcon({
+    required this.tooltip,
+    required this.icon,
+    required this.onTap,
+  });
+
+  final String tooltip;
+  final IconData icon;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 6),
+      child: IconButton(
+        tooltip: tooltip,
+        onPressed: onTap,
+        style: IconButton.styleFrom(
+          backgroundColor: cs.onSurface.withValues(alpha: 0.08),
+          foregroundColor: cs.onSurface.withValues(alpha: 0.85),
+        ),
+        icon: Icon(icon, size: 22),
+      ),
+    );
+  }
+}
+
+class _ScrollDownCue extends StatelessWidget {
+  const _ScrollDownCue({required this.onTap, required this.color});
+  final VoidCallback onTap;
+  final Color color;
+
+  @override
+  Widget build(BuildContext context) {
+    return MouseRegion(
+      cursor: SystemMouseCursors.click,
+      child: GestureDetector(
+        onTap: onTap,
+        child: Column(
+          children: [
+            Container(
+              width: 44,
+              height: 44,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                border: Border.all(color: color.withValues(alpha: 0.65), width: 2),
+                color: color.withValues(alpha: 0.12),
+              ),
+              child: Icon(Icons.keyboard_arrow_down_rounded, color: color, size: 28),
+            ),
+          ],
+        ),
       ),
     );
   }
