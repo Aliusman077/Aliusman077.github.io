@@ -232,63 +232,133 @@ class _PortfolioNavBar extends StatelessWidget {
                   ),
                 ],
         ),
-        padding: const EdgeInsets.symmetric(horizontal: 16),
-        child: Row(
-          children: [
-            InkWell(
-              onTap: onHome,
-              borderRadius: BorderRadius.circular(8),
-              child: Padding(
-                padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 4),
-                child: Text.rich(
-                  TextSpan(
-                    style: const TextStyle(fontSize: 19, fontWeight: FontWeight.w700, letterSpacing: -0.35),
+        padding: const EdgeInsets.symmetric(horizontal: 12),
+        child: Center(
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 1120),
+            child: wide
+                ? Row(
                     children: [
-                      TextSpan(text: kBrandFirst, style: TextStyle(color: cs.onSurface)),
-                      TextSpan(text: kBrandAccent, style: TextStyle(color: cs.primary)),
+                      Expanded(
+                        flex: 1,
+                        child: Align(
+                          alignment: Alignment.centerLeft,
+                          child: InkWell(
+                            onTap: onHome,
+                            borderRadius: BorderRadius.circular(8),
+                            child: Padding(
+                              padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 4),
+                              child: Text.rich(
+                                TextSpan(
+                                  style: const TextStyle(
+                                    fontSize: 17,
+                                    fontWeight: FontWeight.w700,
+                                    letterSpacing: -0.25,
+                                  ),
+                                  children: [
+                                    TextSpan(text: kBrandFirst, style: TextStyle(color: cs.onSurface)),
+                                    TextSpan(text: kBrandAccent, style: TextStyle(color: cs.primary)),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                      Expanded(
+                        flex: 2,
+                        child: Center(
+                          child: SingleChildScrollView(
+                            scrollDirection: Axis.horizontal,
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                _TopNavLink('Home', onHome, navMuted),
+                                _TopNavLink('About', onAbout, navMuted),
+                                _TopNavLink('Experience', onExperience, navMuted),
+                                _TopNavLink('Projects', onProjects, navMuted),
+                                _TopNavLink('Skills', onSkills, navMuted),
+                                _TopNavLink('Education', onEducation, navMuted),
+                                _TopNavLink('Contact', onContact, navMuted),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ),
+                      Expanded(
+                        flex: 1,
+                        child: Align(
+                          alignment: Alignment.centerRight,
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              IconButton(
+                                tooltip: isDarkMode ? 'Light mode' : 'Dark mode',
+                                onPressed: onToggleTheme,
+                                icon: Icon(
+                                  isDarkMode ? Icons.dark_mode_outlined : Icons.light_mode_outlined,
+                                  color: cs.onSurface.withValues(alpha: 0.88),
+                                ),
+                              ),
+                              FilledButton(
+                                onPressed: onGetInTouch,
+                                style: FilledButton.styleFrom(
+                                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                                  textStyle: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
+                                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                                ),
+                                child: const Text('Get In Touch'),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ],
+                  )
+                : Row(
+                    children: [
+                      InkWell(
+                        onTap: onHome,
+                        borderRadius: BorderRadius.circular(8),
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 4),
+                          child: Text.rich(
+                            TextSpan(
+                              style: const TextStyle(
+                                fontSize: 17,
+                                fontWeight: FontWeight.w700,
+                                letterSpacing: -0.25,
+                              ),
+                              children: [
+                                TextSpan(text: kBrandFirst, style: TextStyle(color: cs.onSurface)),
+                                TextSpan(text: kBrandAccent, style: TextStyle(color: cs.primary)),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ),
+                      const Spacer(),
+                      IconButton(
+                        tooltip: isDarkMode ? 'Light mode' : 'Dark mode',
+                        onPressed: onToggleTheme,
+                        icon: Icon(
+                          isDarkMode ? Icons.dark_mode_outlined : Icons.light_mode_outlined,
+                          color: cs.onSurface.withValues(alpha: 0.88),
+                        ),
+                      ),
+                      FilledButton(
+                        onPressed: onGetInTouch,
+                        style: FilledButton.styleFrom(
+                          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 11),
+                          textStyle: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600),
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                        ),
+                        child: const Text('Get In Touch'),
+                      ),
                     ],
                   ),
-                ),
-              ),
-            ),
-            if (wide)
-              Expanded(
-                child: SingleChildScrollView(
-                  scrollDirection: Axis.horizontal,
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      _TopNavLink('Home', onHome, navMuted),
-                      _TopNavLink('About', onAbout, navMuted),
-                      _TopNavLink('Experience', onExperience, navMuted),
-                      _TopNavLink('Projects', onProjects, navMuted),
-                      _TopNavLink('Skills', onSkills, navMuted),
-                      _TopNavLink('Education', onEducation, navMuted),
-                      _TopNavLink('Contact', onContact, navMuted),
-                    ],
-                  ),
-                ),
-              )
-            else
-              const Spacer(),
-            IconButton(
-              tooltip: isDarkMode ? 'Light mode' : 'Dark mode',
-              onPressed: onToggleTheme,
-              icon: Icon(
-                isDarkMode ? Icons.dark_mode_outlined : Icons.light_mode_outlined,
-                color: cs.onSurface.withValues(alpha: 0.88),
-              ),
-            ),
-            const SizedBox(width: 4),
-            FilledButton(
-              onPressed: onGetInTouch,
-              style: FilledButton.styleFrom(
-                padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 12),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-              ),
-              child: const Text('Get In Touch'),
-            ),
-          ],
+          ),
         ),
       ),
     );
@@ -311,7 +381,7 @@ class _TopNavLink extends StatelessWidget {
         minimumSize: Size.zero,
         tapTargetSize: MaterialTapTargetSize.shrinkWrap,
       ),
-      child: Text(label, style: TextStyle(fontWeight: FontWeight.w500, fontSize: 14, color: color)),
+      child: Text(label, style: TextStyle(fontWeight: FontWeight.w500, fontSize: 15, height: 1.2, color: color)),
     );
   }
 }
@@ -408,12 +478,15 @@ class _HeroState extends State<_Hero> with SingleTickerProviderStateMixin {
     final muted = widget.muted;
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final heroBorder = isDark ? const Color(0x14FFFFFF) : const Color(0x14000000);
-    final roleColor = Color.lerp(muted, cs.onSurface, 0.55)!;
-    final headlineStyle = Theme.of(context).textTheme.displaySmall?.copyWith(
-          fontWeight: FontWeight.w800,
-          letterSpacing: -1,
-        ) ??
-        const TextStyle(fontSize: 36, fontWeight: FontWeight.w800, letterSpacing: -1);
+    final roleColor = Color.lerp(muted, cs.onSurface, 0.5)!;
+    final w = MediaQuery.sizeOf(context).width;
+    final nameSize = w >= 900 ? 52.0 : (w >= 600 ? 40.0 : 32.0);
+    final headlineStyle = TextStyle(
+      fontSize: nameSize,
+      fontWeight: FontWeight.w800,
+      letterSpacing: nameSize >= 48 ? -1.6 : -1.1,
+      height: 1.08,
+    );
 
     return Container(
       decoration: BoxDecoration(
@@ -445,7 +518,7 @@ class _HeroState extends State<_Hero> with SingleTickerProviderStateMixin {
             ),
           ),
           Padding(
-            padding: const EdgeInsets.fromLTRB(12, 28, 12, 36),
+            padding: EdgeInsets.fromLTRB(16, w >= 900 ? 36 : 24, 16, w >= 900 ? 44 : 32),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
@@ -461,38 +534,47 @@ class _HeroState extends State<_Hero> with SingleTickerProviderStateMixin {
                     .animate()
                     .fadeIn(duration: 550.ms, curve: Curves.easeOutCubic)
                     .slideY(begin: 0.06, end: 0, curve: Curves.easeOutCubic),
-                const SizedBox(height: 12),
+                SizedBox(height: w >= 900 ? 14 : 10),
                 Text(
                   '$kHeroRole · $kPortfolioLocation',
                   textAlign: TextAlign.center,
                   style: TextStyle(
-                    fontSize: 17,
+                    fontSize: w >= 900 ? 19 : 16,
                     color: roleColor,
                     fontWeight: FontWeight.w500,
-                    height: 1.45,
+                    height: 1.4,
                   ),
                 )
                     .animate()
                     .fadeIn(delay: 90.ms, duration: 500.ms)
                     .slideY(begin: 0.08, end: 0, curve: Curves.easeOutCubic),
-                const SizedBox(height: 12),
-                Text(
-                  kHeroTagline,
-                  textAlign: TextAlign.center,
-                  style: TextStyle(fontSize: 16, color: muted, height: 1.55),
+                SizedBox(height: w >= 900 ? 14 : 10),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 8),
+                  child: Text(
+                    kHeroTagline,
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      fontSize: w >= 900 ? 17 : 15,
+                      color: muted,
+                      height: 1.55,
+                      fontWeight: FontWeight.w400,
+                    ),
+                  ),
                 )
                     .animate()
                     .fadeIn(delay: 160.ms, duration: 550.ms)
                     .slideY(begin: 0.1, end: 0, curve: Curves.easeOutCubic),
-                const SizedBox(height: 14),
+                SizedBox(height: w >= 900 ? 16 : 12),
                 Text(
                   kHeroStatsLine,
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     color: cs.primary,
-                    fontSize: 15,
+                    fontSize: w >= 900 ? 16 : 14,
                     fontWeight: FontWeight.w600,
-                    height: 1.4,
+                    height: 1.35,
+                    letterSpacing: 0.15,
                   ),
                 )
                     .animate()
@@ -502,7 +584,7 @@ class _HeroState extends State<_Hero> with SingleTickerProviderStateMixin {
                       duration: 2600.ms,
                       color: cs.primary.withValues(alpha: 0.25),
                     ),
-                const SizedBox(height: 28),
+                SizedBox(height: w >= 900 ? 32 : 24),
                 Wrap(
                   alignment: WrapAlignment.center,
                   spacing: 14,
@@ -511,7 +593,14 @@ class _HeroState extends State<_Hero> with SingleTickerProviderStateMixin {
                     FilledButton(
                       onPressed: widget.onWork,
                       style: FilledButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
+                        padding: EdgeInsets.symmetric(
+                          horizontal: w >= 900 ? 28 : 22,
+                          vertical: w >= 900 ? 15 : 13,
+                        ),
+                        textStyle: TextStyle(
+                          fontSize: w >= 900 ? 15 : 14,
+                          fontWeight: FontWeight.w600,
+                        ),
                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
                       ),
                       child: const Text('View My Work'),
@@ -519,7 +608,14 @@ class _HeroState extends State<_Hero> with SingleTickerProviderStateMixin {
                     OutlinedButton(
                       onPressed: widget.onContact,
                       style: OutlinedButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
+                        padding: EdgeInsets.symmetric(
+                          horizontal: w >= 900 ? 28 : 22,
+                          vertical: w >= 900 ? 15 : 13,
+                        ),
+                        textStyle: TextStyle(
+                          fontSize: w >= 900 ? 15 : 14,
+                          fontWeight: FontWeight.w600,
+                        ),
                         foregroundColor: cs.onSurface,
                         side: BorderSide(color: cs.onSurface.withValues(alpha: 0.35)),
                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
