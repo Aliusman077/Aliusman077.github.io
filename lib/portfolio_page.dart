@@ -6,18 +6,13 @@ import 'package:url_launcher/url_launcher.dart';
 
 import 'portfolio_data.dart';
 
-/// Single-page portfolio with anchored sections (Flutter web), inspired by
-/// https://khanusman1269.github.io — top bar, centered hero, scroll-linked nav.
-class PortfolioPage extends StatefulWidget {
-  const PortfolioPage({
-    super.key,
-    required this.isDarkMode,
-    required this.onToggleTheme,
-  });
+const kAccent = Color(0xFF3DD6C6);
+const kMutedColor = Color(0xFF8B9BB4);
 
+class PortfolioPage extends StatefulWidget {
+  const PortfolioPage({super.key, required this.isDarkMode, required this.onToggleTheme});
   final bool isDarkMode;
   final VoidCallback onToggleTheme;
-
   @override
   State<PortfolioPage> createState() => _PortfolioPageState();
 }
@@ -34,28 +29,16 @@ class _PortfolioPageState extends State<PortfolioPage> {
 
   Future<void> _openUri(String url) async {
     final uri = Uri.parse(url);
-    if (await canLaunchUrl(uri)) {
-      await launchUrl(uri, mode: LaunchMode.externalApplication);
-    }
+    if (await canLaunchUrl(uri)) await launchUrl(uri, mode: LaunchMode.externalApplication);
   }
 
   void _scrollTo(GlobalKey key) {
     final ctx = key.currentContext;
-    if (ctx != null) {
-      Scrollable.ensureVisible(
-        ctx,
-        duration: const Duration(milliseconds: 550),
-        curve: Curves.easeOutCubic,
-        alignment: 0.05,
-      );
-    }
+    if (ctx != null) Scrollable.ensureVisible(ctx, duration: const Duration(milliseconds: 600), curve: Curves.easeOutCubic, alignment: 0.05);
   }
 
   @override
-  void dispose() {
-    _scroll.dispose();
-    super.dispose();
-  }
+  void dispose() { _scroll.dispose(); super.dispose(); }
 
   @override
   Widget build(BuildContext context) {
@@ -64,1338 +47,893 @@ class _PortfolioPageState extends State<PortfolioPage> {
     const muted = Color(0xFF8B9BB4);
     final navBg = isDark ? const Color(0xEE0A0E14) : Colors.white;
     final navBorder = isDark ? const Color(0x14FFFFFF) : const Color(0x14000000);
-
     return Scaffold(
-      body: LayoutBuilder(
-        builder: (context, constraints) {
-          final wide = constraints.maxWidth >= 1000;
-          return Column(
-            children: [
-              _PortfolioNavBar(
-                wide: wide,
-                navBg: navBg,
-                navBorder: navBorder,
-                isDarkMode: widget.isDarkMode,
-                onToggleTheme: widget.onToggleTheme,
-                onHome: () => _scrollTo(_kHero),
-                onAbout: () => _scrollTo(_kAbout),
-                onExperience: () => _scrollTo(_kJourney),
-                onProjects: () => _scrollTo(_kProjects),
-                onSkills: () => _scrollTo(_kSkills),
-                onEducation: () => _scrollTo(_kEducation),
-                onContact: () => _scrollTo(_kConnect),
-                onGetInTouch: () => _scrollTo(_kConnect),
+      body: LayoutBuilder(builder: (context, constraints) {
+        final wide = constraints.maxWidth >= 1000;
+        return Column(children: [
+          PortfolioNavBar(
+            wide: wide, navBg: navBg, navBorder: navBorder,
+            isDarkMode: widget.isDarkMode, onToggleTheme: widget.onToggleTheme,
+            onHome: () => _scrollTo(_kHero), onAbout: () => _scrollTo(_kAbout),
+            onExperience: () => _scrollTo(_kJourney), onProjects: () => _scrollTo(_kProjects),
+            onSkills: () => _scrollTo(_kSkills), onEducation: () => _scrollTo(_kEducation),
+            onContact: () => _scrollTo(_kConnect), onGetInTouch: () => _scrollTo(_kConnect),
+          ),
+          Expanded(child: CustomScrollView(controller: _scroll, slivers: [
+            if (!wide) SliverToBoxAdapter(child: Padding(
+              padding: const EdgeInsets.fromLTRB(12, 8, 12, 0),
+              child: Wrap(spacing: 4, runSpacing: 4, alignment: WrapAlignment.center, children: [
+                ChipNav('About', () => _scrollTo(_kAbout)),
+                ChipNav('Experience', () => _scrollTo(_kJourney)),
+                ChipNav('Projects', () => _scrollTo(_kProjects)),
+                ChipNav('Skills', () => _scrollTo(_kSkills)),
+                ChipNav('Education', () => _scrollTo(_kEducation)),
+                ChipNav('Contact', () => _scrollTo(_kConnect)),
+              ]),
+            )),
+            SliverToBoxAdapter(child: Center(child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 1100),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 20),
+                child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+                  HeroSection(key: _kHero, cs: cs, muted: muted,
+                    onWork: () => _scrollTo(_kProjects), onContact: () => _scrollTo(_kConnect),
+                    onLinkedIn: () => _openUri(kPortfolioLinkedInUrl),
+                    onGithub: () => _openUri('https://github.com/\$kPortfolioGithubUser'),
+                    onEmail: () => _openUri('mailto:\$kPortfolioEmail'),
+                    onScrollDown: () => _scrollTo(_kAbout)),
+                  const SectionGap(),
+                  AboutSection(key: _kAbout),
+                  const SectionGap(),
+                  JourneySection(key: _kJourney),
+                  const SectionGap(),
+                  ProjectsSection(key: _kProjects),
+                  const SectionGap(),
+                  SkillsSection(key: _kSkills),
+                  const SectionGap(),
+                  EducationSection(key: _kEducation),
+                  const SectionGap(),
+                  ConnectSection(key: _kConnect, muted: muted,
+                    onGithub: () => _openUri('https://github.com/\$kPortfolioGithubUser'),
+                    onLinkedIn: () => _openUri(kPortfolioLinkedInUrl),
+                    onEmail: () => _openUri('mailto:\$kPortfolioEmail'),
+                    onPhone: () => _openUri('tel:\$kPortfolioPhoneTel')),
+                  const SizedBox(height: 48),
+                  PortfolioFooter(
+                    onLinkedIn: () => _openUri(kPortfolioLinkedInUrl),
+                    onGithub: () => _openUri('https://github.com/\$kPortfolioGithubUser'),
+                    onEmail: () => _openUri('mailto:\$kPortfolioEmail')),
+                  const SizedBox(height: 32),
+                ]),
               ),
-              Expanded(
-                child: CustomScrollView(
-                  controller: _scroll,
-                  slivers: [
-                    if (!wide)
-                      SliverToBoxAdapter(
-                        child: Padding(
-                          padding: const EdgeInsets.fromLTRB(12, 8, 12, 0),
-                          child: Wrap(
-                            spacing: 4,
-                            runSpacing: 4,
-                            alignment: WrapAlignment.center,
-                            children: [
-                              _ChipNav('About', () => _scrollTo(_kAbout)),
-                              _ChipNav('Experience', () => _scrollTo(_kJourney)),
-                              _ChipNav('Projects', () => _scrollTo(_kProjects)),
-                              _ChipNav('Skills', () => _scrollTo(_kSkills)),
-                              _ChipNav('Education', () => _scrollTo(_kEducation)),
-                              _ChipNav('Contact', () => _scrollTo(_kConnect)),
-                            ],
-                          ),
-                        ),
-                      ),
-                    SliverToBoxAdapter(
-                      child: Center(
-                        child: ConstrainedBox(
-                          constraints: const BoxConstraints(maxWidth: 1100),
-                          child: Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 20),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.stretch,
-                              children: [
-                                _Hero(
-                                  key: _kHero,
-                                  cs: cs,
-                                  muted: muted,
-                                  onWork: () => _scrollTo(_kProjects),
-                                  onContact: () => _scrollTo(_kConnect),
-                                  onLinkedIn: () => _openUri(kPortfolioLinkedInUrl),
-                                  onGithub: () => _openUri('https://github.com/$kPortfolioGithubUser'),
-                                  onEmail: () => _openUri('mailto:$kPortfolioEmail'),
-                                  onScrollDown: () => _scrollTo(_kAbout),
-                                ),
-                                const _SectionGap(),
-                                _AboutSection(key: _kAbout),
-                                const _SectionGap(),
-                                _JourneySection(key: _kJourney),
-                                const _SectionGap(),
-                                _ProjectsSection(key: _kProjects),
-                                const _SectionGap(),
-                                _SkillsSection(key: _kSkills),
-                                const _SectionGap(),
-                                _EducationSection(key: _kEducation),
-                                const _SectionGap(),
-                                _ConnectSection(
-                                  key: _kConnect,
-                                  muted: muted,
-                                  onGithub: () => _openUri('https://github.com/$kPortfolioGithubUser'),
-                                  onLinkedIn: () => _openUri(kPortfolioLinkedInUrl),
-                                  onEmail: () => _openUri('mailto:$kPortfolioEmail'),
-                                  onPhone: () => _openUri('tel:$kPortfolioPhoneTel'),
-                                ),
-                                const SizedBox(height: 48),
-                                Text(
-                                  '© ${DateTime.now().year} $kHeroName · Flutter · GitHub Pages',
-                                  textAlign: TextAlign.center,
-                                  style: const TextStyle(color: muted, fontSize: 13),
-                                ),
-                                const SizedBox(height: 32),
-                              ],
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          );
-        },
+            ))),
+          ])),
+        ]);
+      }),
+    );
+  }
+}
+
+class SectionGap extends StatelessWidget {
+  const SectionGap();
+  @override
+  Widget build(BuildContext context) => const SizedBox(height: 56);
+}
+
+class HoverLift extends StatefulWidget {
+  const HoverLift({super.key, required this.child, this.scaleEnd = 1.013});
+  final Widget child;
+  final double scaleEnd;
+  @override
+  State<HoverLift> createState() => _HoverLiftState();
+}
+class _HoverLiftState extends State<HoverLift> {
+  bool hover = false;
+  @override
+  Widget build(BuildContext context) {
+    return MouseRegion(
+      onEnter: (_) => setState(() => hover = true),
+      onExit: (_) => setState(() => hover = false),
+      child: AnimatedScale(
+        scale: hover ? widget.scaleEnd : 1,
+        duration: const Duration(milliseconds: 200),
+        curve: Curves.easeOutCubic,
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 200),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(14),
+            boxShadow: hover ? [BoxShadow(color: kAccent.withValues(alpha: 0.12), blurRadius: 24, spreadRadius: 0)] : [],
+          ),
+          child: widget.child,
+        ),
       ),
     );
   }
 }
 
-class _SectionGap extends StatelessWidget {
-  const _SectionGap();
-
-  @override
-  Widget build(BuildContext context) => const SizedBox(height: 40);
-}
-
-/// Reference-style top bar: split brand, centered links, theme toggle, CTA.
-class _PortfolioNavBar extends StatelessWidget {
-  const _PortfolioNavBar({
-    required this.wide,
-    required this.navBg,
-    required this.navBorder,
-    required this.isDarkMode,
-    required this.onToggleTheme,
-    required this.onHome,
-    required this.onAbout,
-    required this.onExperience,
-    required this.onProjects,
-    required this.onSkills,
-    required this.onEducation,
-    required this.onContact,
-    required this.onGetInTouch,
-  });
-
+class PortfolioNavBar extends StatelessWidget {
+  const PortfolioNavBar({super.key, required this.wide, required this.navBg, required this.navBorder,
+    required this.isDarkMode, required this.onToggleTheme, required this.onHome, required this.onAbout,
+    required this.onExperience, required this.onProjects, required this.onSkills,
+    required this.onEducation, required this.onContact, required this.onGetInTouch});
   final bool wide;
-  final Color navBg;
-  final Color navBorder;
+  final Color navBg, navBorder;
   final bool isDarkMode;
-  final VoidCallback onToggleTheme;
-  final VoidCallback onHome;
-  final VoidCallback onAbout;
-  final VoidCallback onExperience;
-  final VoidCallback onProjects;
-  final VoidCallback onSkills;
-  final VoidCallback onEducation;
-  final VoidCallback onContact;
-  final VoidCallback onGetInTouch;
+  final VoidCallback onToggleTheme, onHome, onAbout, onExperience, onProjects, onSkills, onEducation, onContact, onGetInTouch;
 
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
     final navMuted = Color.lerp(cs.onSurface, cs.surface, isDarkMode ? 0.35 : 0.45)!;
-
     return Material(
       color: navBg,
       child: Container(
         height: 72,
         decoration: BoxDecoration(
           border: Border(bottom: BorderSide(color: navBorder)),
-          boxShadow: isDarkMode
-              ? null
-              : [
-                  BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.06),
-                    blurRadius: 12,
-                    offset: const Offset(0, 4),
-                  ),
-                ],
+          boxShadow: isDarkMode ? null : [BoxShadow(color: Colors.black.withValues(alpha: 0.06), blurRadius: 12, offset: const Offset(0, 4))],
         ),
         padding: const EdgeInsets.symmetric(horizontal: 12),
-        child: Center(
-          child: ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: 1120),
-            child: wide
-                ? Row(
-                    children: [
-                      Expanded(
-                        flex: 1,
-                        child: Align(
-                          alignment: Alignment.centerLeft,
-                          child: InkWell(
-                            onTap: onHome,
-                            borderRadius: BorderRadius.circular(8),
-                            child: Padding(
-                              padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 4),
-                              child: Text.rich(
-                                TextSpan(
-                                  style: const TextStyle(
-                                    fontSize: 17,
-                                    fontWeight: FontWeight.w700,
-                                    letterSpacing: -0.25,
-                                  ),
-                                  children: [
-                                    TextSpan(text: kBrandFirst, style: TextStyle(color: cs.onSurface)),
-                                    TextSpan(text: kBrandAccent, style: TextStyle(color: cs.primary)),
-                                  ],
-                                ),
-                              ),
-                            ),
-                          ),
-                        ),
-                      ),
-                      Expanded(
-                        flex: 2,
-                        child: Center(
-                          child: SingleChildScrollView(
-                            scrollDirection: Axis.horizontal,
-                            child: Row(
-                              mainAxisSize: MainAxisSize.min,
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                _TopNavLink('Home', onHome, navMuted),
-                                _TopNavLink('About', onAbout, navMuted),
-                                _TopNavLink('Experience', onExperience, navMuted),
-                                _TopNavLink('Projects', onProjects, navMuted),
-                                _TopNavLink('Skills', onSkills, navMuted),
-                                _TopNavLink('Education', onEducation, navMuted),
-                                _TopNavLink('Contact', onContact, navMuted),
-                              ],
-                            ),
-                          ),
-                        ),
-                      ),
-                      Expanded(
-                        flex: 1,
-                        child: Align(
-                          alignment: Alignment.centerRight,
-                          child: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              IconButton(
-                                tooltip: isDarkMode ? 'Light mode' : 'Dark mode',
-                                onPressed: onToggleTheme,
-                                icon: Icon(
-                                  isDarkMode ? Icons.dark_mode_outlined : Icons.light_mode_outlined,
-                                  color: cs.onSurface.withValues(alpha: 0.88),
-                                ),
-                              ),
-                              FilledButton(
-                                onPressed: onGetInTouch,
-                                style: FilledButton.styleFrom(
-                                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                                  textStyle: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
-                                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-                                ),
-                                child: const Text('Get In Touch'),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                    ],
-                  )
-                : Row(
-                    children: [
-                      InkWell(
-                        onTap: onHome,
-                        borderRadius: BorderRadius.circular(8),
-                        child: Padding(
-                          padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 4),
-                          child: Text.rich(
-                            TextSpan(
-                              style: const TextStyle(
-                                fontSize: 17,
-                                fontWeight: FontWeight.w700,
-                                letterSpacing: -0.25,
-                              ),
-                              children: [
-                                TextSpan(text: kBrandFirst, style: TextStyle(color: cs.onSurface)),
-                                TextSpan(text: kBrandAccent, style: TextStyle(color: cs.primary)),
-                              ],
-                            ),
-                          ),
-                        ),
-                      ),
-                      const Spacer(),
-                      IconButton(
-                        tooltip: isDarkMode ? 'Light mode' : 'Dark mode',
-                        onPressed: onToggleTheme,
-                        icon: Icon(
-                          isDarkMode ? Icons.dark_mode_outlined : Icons.light_mode_outlined,
-                          color: cs.onSurface.withValues(alpha: 0.88),
-                        ),
-                      ),
-                      FilledButton(
-                        onPressed: onGetInTouch,
-                        style: FilledButton.styleFrom(
-                          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 11),
-                          textStyle: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600),
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-                        ),
-                        child: const Text('Get In Touch'),
-                      ),
-                    ],
-                  ),
-          ),
-        ),
+        child: Center(child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 1120),
+          child: wide ? Row(children: [
+            Expanded(flex: 1, child: Align(alignment: Alignment.centerLeft, child: InkWell(onTap: onHome, borderRadius: BorderRadius.circular(8), child: Padding(
+              padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 4),
+              child: Text.rich(TextSpan(style: const TextStyle(fontSize: 17, fontWeight: FontWeight.w700, letterSpacing: -0.25), children: [
+                TextSpan(text: kBrandFirst, style: TextStyle(color: cs.onSurface)),
+                TextSpan(text: kBrandAccent, style: TextStyle(color: cs.primary)),
+              ])),
+            )))),
+            Expanded(flex: 2, child: Center(child: SingleChildScrollView(scrollDirection: Axis.horizontal, child: Row(mainAxisSize: MainAxisSize.min, children: [
+              TopNavLink('Home', onHome, navMuted), TopNavLink('About', onAbout, navMuted),
+              TopNavLink('Experience', onExperience, navMuted), TopNavLink('Projects', onProjects, navMuted),
+              TopNavLink('Skills', onSkills, navMuted), TopNavLink('Education', onEducation, navMuted),
+              TopNavLink('Contact', onContact, navMuted),
+            ])))),
+            Expanded(flex: 1, child: Align(alignment: Alignment.centerRight, child: Row(mainAxisSize: MainAxisSize.min, children: [
+              IconButton(tooltip: isDarkMode ? 'Light mode' : 'Dark mode', onPressed: onToggleTheme,
+                icon: Icon(isDarkMode ? Icons.dark_mode_outlined : Icons.light_mode_outlined, color: cs.onSurface.withValues(alpha: 0.88))),
+              const SizedBox(width: 8),
+              FilledButton(onPressed: onGetInTouch,
+                style: FilledButton.styleFrom(padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 12), textStyle: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10))),
+                child: const Text('Get In Touch')),
+            ]))),
+          ]) : Row(children: [
+            InkWell(onTap: onHome, borderRadius: BorderRadius.circular(8), child: Padding(
+              padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 4),
+              child: Text.rich(TextSpan(style: const TextStyle(fontSize: 17, fontWeight: FontWeight.w700, letterSpacing: -0.25), children: [
+                TextSpan(text: kBrandFirst, style: TextStyle(color: cs.onSurface)),
+                TextSpan(text: kBrandAccent, style: TextStyle(color: cs.primary)),
+              ])),
+            )),
+            const Spacer(),
+            IconButton(tooltip: isDarkMode ? 'Light mode' : 'Dark mode', onPressed: onToggleTheme,
+              icon: Icon(isDarkMode ? Icons.dark_mode_outlined : Icons.light_mode_outlined, color: cs.onSurface.withValues(alpha: 0.88))),
+            FilledButton(onPressed: onGetInTouch,
+              style: FilledButton.styleFrom(padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 11), textStyle: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10))),
+              child: const Text('Get In Touch')),
+          ]),
+        )),
       ),
     );
   }
 }
 
-class _TopNavLink extends StatelessWidget {
-  const _TopNavLink(this.label, this.onTap, this.color);
+class TopNavLink extends StatefulWidget {
+  const TopNavLink(this.label, this.onTap, this.color);
   final String label;
   final VoidCallback onTap;
   final Color color;
-
+  @override
+  State<TopNavLink> createState() => _TopNavLinkState();
+}
+class _TopNavLinkState extends State<TopNavLink> {
+  bool hover = false;
   @override
   Widget build(BuildContext context) {
-    return TextButton(
-      onPressed: onTap,
-      style: TextButton.styleFrom(
-        foregroundColor: color,
-        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
-        minimumSize: Size.zero,
-        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+    final cs = Theme.of(context).colorScheme;
+    return MouseRegion(
+      onEnter: (_) => setState(() => hover = true),
+      onExit: (_) => setState(() => hover = false),
+      child: TextButton(
+        onPressed: widget.onTap,
+        style: TextButton.styleFrom(foregroundColor: hover ? cs.primary : widget.color, padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10), minimumSize: Size.zero, tapTargetSize: MaterialTapTargetSize.shrinkWrap),
+        child: AnimatedDefaultTextStyle(
+          duration: const Duration(milliseconds: 150),
+          style: TextStyle(fontWeight: hover ? FontWeight.w700 : FontWeight.w500, fontSize: 15, height: 1.2, color: hover ? cs.primary : widget.color),
+          child: Text(widget.label),
+        ),
       ),
-      child: Text(label, style: TextStyle(fontWeight: FontWeight.w500, fontSize: 15, height: 1.2, color: color)),
     );
   }
 }
 
-class _ChipNav extends StatelessWidget {
-  const _ChipNav(this.label, this.onTap);
+class ChipNav extends StatelessWidget {
+  const ChipNav(this.label, this.onTap);
   final String label;
   final VoidCallback onTap;
-
   @override
-  Widget build(BuildContext context) {
-    return ActionChip(
-      label: Text(label),
-      onPressed: onTap,
-      visualDensity: VisualDensity.compact,
-    );
-  }
+  Widget build(BuildContext context) => ActionChip(label: Text(label), onPressed: onTap, visualDensity: VisualDensity.compact);
 }
 
-/// Subtle hover lift on cards (web / desktop), similar to polished portfolio sites.
-class _HoverLift extends StatefulWidget {
-  const _HoverLift({required this.child, this.scaleEnd = 1.012});
-  final Widget child;
-  final double scaleEnd;
-
-  @override
-  State<_HoverLift> createState() => _HoverLiftState();
-}
-
-class _HoverLiftState extends State<_HoverLift> {
-  bool _hover = false;
-
-  @override
-  Widget build(BuildContext context) {
-    return MouseRegion(
-      onEnter: (_) => setState(() => _hover = true),
-      onExit: (_) => setState(() => _hover = false),
-      child: AnimatedScale(
-        scale: _hover ? widget.scaleEnd : 1,
-        duration: const Duration(milliseconds: 180),
-        curve: Curves.easeOutCubic,
-        child: widget.child,
-      ),
-    );
-  }
-}
-
-/// Hero with slow gradient pulse (reference-style ambient motion) and entrance animations.
-class _Hero extends StatefulWidget {
-  const _Hero({
-    super.key,
-    required this.cs,
-    required this.muted,
-    required this.onWork,
-    required this.onContact,
-    required this.onLinkedIn,
-    required this.onGithub,
-    required this.onEmail,
-    required this.onScrollDown,
-  });
-
+class HeroSection extends StatefulWidget {
+  const HeroSection({super.key, required this.cs, required this.muted, required this.onWork,
+    required this.onContact, required this.onLinkedIn, required this.onGithub,
+    required this.onEmail, required this.onScrollDown});
   final ColorScheme cs;
   final Color muted;
-  final VoidCallback onWork;
-  final VoidCallback onContact;
-  final VoidCallback onLinkedIn;
-  final VoidCallback onGithub;
-  final VoidCallback onEmail;
-  final VoidCallback onScrollDown;
-
+  final VoidCallback onWork, onContact, onLinkedIn, onGithub, onEmail, onScrollDown;
   @override
-  State<_Hero> createState() => _HeroState();
+  State<HeroSection> createState() => _HeroSectionState();
 }
 
-class _HeroState extends State<_Hero> with SingleTickerProviderStateMixin {
-  late AnimationController _ambient;
+class _HeroSectionState extends State<HeroSection> with TickerProviderStateMixin {
+  late AnimationController ambient;
+  late AnimationController avatarPulse;
+  final List<String> roles = ['Android Engineer', 'Kotlin Developer', 'Jetpack Compose Expert', 'Clean Architecture Advocate'];
+  int roleIndex = 0;
+  String displayedRole = '';
+  bool typing = true;
+  Timer? typeTimer;
 
   @override
   void initState() {
     super.initState();
-    _ambient = AnimationController(vsync: this, duration: const Duration(seconds: 7))
-      ..repeat(reverse: true);
+    ambient = AnimationController(vsync: this, duration: const Duration(seconds: 7))..repeat(reverse: true);
+    avatarPulse = AnimationController(vsync: this, duration: const Duration(seconds: 3))..repeat(reverse: true);
+    startTypewriter();
+  }
+
+  void startTypewriter() {
+    typeTimer?.cancel();
+    final target = roles[roleIndex];
+    typeTimer = Timer.periodic(const Duration(milliseconds: 60), (t) {
+      if (!mounted) { t.cancel(); return; }
+      setState(() {
+        if (typing) {
+          if (displayedRole.length < target.length) {
+            displayedRole = target.substring(0, displayedRole.length + 1);
+          } else {
+            typing = false; t.cancel();
+            Future.delayed(const Duration(milliseconds: 1800), eraseRole);
+          }
+        }
+      });
+    });
+  }
+
+  void eraseRole() {
+    typeTimer?.cancel();
+    typeTimer = Timer.periodic(const Duration(milliseconds: 35), (t) {
+      if (!mounted) { t.cancel(); return; }
+      setState(() {
+        if (displayedRole.isNotEmpty) {
+          displayedRole = displayedRole.substring(0, displayedRole.length - 1);
+        } else {
+          typing = true; roleIndex = (roleIndex + 1) % roles.length; t.cancel(); startTypewriter();
+        }
+      });
+    });
   }
 
   @override
-  void dispose() {
-    _ambient.dispose();
-    super.dispose();
-  }
+  void dispose() { ambient.dispose(); avatarPulse.dispose(); typeTimer?.cancel(); super.dispose(); }
 
   @override
   Widget build(BuildContext context) {
     final cs = widget.cs;
     final muted = widget.muted;
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final heroBorder = isDark ? const Color(0x14FFFFFF) : const Color(0x14000000);
-    final roleColor = Color.lerp(muted, cs.onSurface, 0.5)!;
     final w = MediaQuery.sizeOf(context).width;
-    final nameSize = w >= 900 ? 52.0 : (w >= 600 ? 40.0 : 32.0);
-    final headlineStyle = TextStyle(
-      fontSize: nameSize,
-      fontWeight: FontWeight.w800,
-      letterSpacing: nameSize >= 48 ? -1.6 : -1.1,
-      height: 1.08,
-    );
+    final nameSize = w >= 900 ? 54.0 : (w >= 600 ? 42.0 : 34.0);
+    final headlineStyle = TextStyle(fontSize: nameSize, fontWeight: FontWeight.w800, letterSpacing: nameSize >= 48 ? -1.8 : -1.2, height: 1.08);
 
     return Container(
-      decoration: BoxDecoration(
-        border: Border(bottom: BorderSide(color: heroBorder)),
-      ),
-      child: Stack(
-        clipBehavior: Clip.none,
-        children: [
-          Positioned.fill(
-            child: AnimatedBuilder(
-              animation: _ambient,
-              builder: (context, _) {
-                final t = CurvedAnimation(parent: _ambient, curve: Curves.easeInOutCubic).value;
-                final topGlow = Color.lerp(const Color(0x243DD6C6), const Color(0x423DD6C6), t)!;
-                final fadeBottom = isDark ? const Color(0x000A0E14) : cs.surface.withValues(alpha: 0.2);
-                return DecoratedBox(
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
-                      colors: [
-                        topGlow,
-                        fadeBottom,
-                      ],
-                    ),
-                  ),
-                );
-              },
-            ),
-          ),
-          Padding(
-            padding: EdgeInsets.fromLTRB(16, w >= 900 ? 36 : 24, 16, w >= 900 ? 44 : 32),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                Text.rich(
-                  TextSpan(
-                    children: [
-                      TextSpan(text: kHeroNameFirst, style: headlineStyle.copyWith(color: cs.onSurface)),
-                      TextSpan(text: kHeroNameAccent, style: headlineStyle.copyWith(color: cs.primary)),
-                    ],
-                  ),
-                  textAlign: TextAlign.center,
-                )
-                    .animate()
-                    .fadeIn(duration: 550.ms, curve: Curves.easeOutCubic)
-                    .slideY(begin: 0.06, end: 0, curve: Curves.easeOutCubic),
-                SizedBox(height: w >= 900 ? 14 : 10),
-                Text(
-                  '$kHeroRole · $kPortfolioLocation',
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    fontSize: w >= 900 ? 19 : 16,
-                    color: roleColor,
-                    fontWeight: FontWeight.w500,
-                    height: 1.4,
-                  ),
-                )
-                    .animate()
-                    .fadeIn(delay: 90.ms, duration: 500.ms)
-                    .slideY(begin: 0.08, end: 0, curve: Curves.easeOutCubic),
-                SizedBox(height: w >= 900 ? 14 : 10),
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 8),
-                  child: Text(
-                    kHeroTagline,
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                      fontSize: w >= 900 ? 17 : 15,
-                      color: muted,
-                      height: 1.55,
-                      fontWeight: FontWeight.w400,
-                    ),
-                  ),
-                )
-                    .animate()
-                    .fadeIn(delay: 160.ms, duration: 550.ms)
-                    .slideY(begin: 0.1, end: 0, curve: Curves.easeOutCubic),
-                SizedBox(height: w >= 900 ? 16 : 12),
-                Text(
-                  kHeroStatsLine,
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    color: cs.primary,
-                    fontSize: w >= 900 ? 16 : 14,
-                    fontWeight: FontWeight.w600,
-                    height: 1.35,
-                    letterSpacing: 0.15,
-                  ),
-                )
-                    .animate()
-                    .fadeIn(delay: 220.ms, duration: 500.ms)
-                    .then(delay: 200.ms)
-                    .shimmer(
-                      duration: 2600.ms,
-                      color: cs.primary.withValues(alpha: 0.25),
-                    ),
-                SizedBox(height: w >= 900 ? 32 : 24),
-                Wrap(
-                  alignment: WrapAlignment.center,
-                  spacing: 14,
-                  runSpacing: 14,
-                  children: [
-                    FilledButton(
-                      onPressed: widget.onWork,
-                      style: FilledButton.styleFrom(
-                        padding: EdgeInsets.symmetric(
-                          horizontal: w >= 900 ? 28 : 22,
-                          vertical: w >= 900 ? 15 : 13,
-                        ),
-                        textStyle: TextStyle(
-                          fontSize: w >= 900 ? 15 : 14,
-                          fontWeight: FontWeight.w600,
-                        ),
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-                      ),
-                      child: const Text('View My Work'),
-                    ),
-                    OutlinedButton(
-                      onPressed: widget.onContact,
-                      style: OutlinedButton.styleFrom(
-                        padding: EdgeInsets.symmetric(
-                          horizontal: w >= 900 ? 28 : 22,
-                          vertical: w >= 900 ? 15 : 13,
-                        ),
-                        textStyle: TextStyle(
-                          fontSize: w >= 900 ? 15 : 14,
-                          fontWeight: FontWeight.w600,
-                        ),
-                        foregroundColor: cs.onSurface,
-                        side: BorderSide(color: cs.onSurface.withValues(alpha: 0.35)),
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-                      ),
-                      child: const Text('Contact Me'),
-                    ),
-                  ],
-                ).animate().fadeIn(delay: 300.ms, duration: 450.ms).scale(
-                      begin: const Offset(0.96, 0.96),
-                      curve: Curves.easeOutBack,
-                    ),
-                const SizedBox(height: 28),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    _HeroSocialIcon(
-                      tooltip: 'LinkedIn',
-                      icon: Icons.work_outline_rounded,
-                      onTap: widget.onLinkedIn,
-                    ),
-                    _HeroSocialIcon(
-                      tooltip: 'GitHub',
-                      icon: Icons.code_rounded,
-                      onTap: widget.onGithub,
-                    ),
-                    _HeroSocialIcon(
-                      tooltip: 'Email',
-                      icon: Icons.mail_outline_rounded,
-                      onTap: widget.onEmail,
-                    ),
-                  ],
-                )
-                    .animate()
-                    .fadeIn(delay: 380.ms, duration: 450.ms)
-                    .slideY(begin: 0.12, end: 0, curve: Curves.easeOutCubic),
-                const SizedBox(height: 36),
-                _ScrollDownCue(onTap: widget.onScrollDown, color: cs.primary)
-                    .animate()
-                    .fadeIn(delay: 520.ms, duration: 500.ms)
-                    .scale(begin: const Offset(0.85, 0.85), curve: Curves.easeOutBack),
-              ],
-            ),
-          ),
-        ],
-      ),
+      decoration: BoxDecoration(border: Border(bottom: BorderSide(color: isDark ? const Color(0x14FFFFFF) : const Color(0x14000000)))),
+      child: Stack(clipBehavior: Clip.none, children: [
+        Positioned.fill(child: AnimatedBuilder(animation: ambient, builder: (context, _) {
+          final t = CurvedAnimation(parent: ambient, curve: Curves.easeInOutCubic).value;
+          return DecoratedBox(decoration: BoxDecoration(gradient: LinearGradient(
+            begin: Alignment.topLeft, end: Alignment.bottomRight,
+            colors: [Color.lerp(const Color(0x1A3DD6C6), const Color(0x3A3DD6C6), t)!,
+              Color.lerp(isDark ? const Color(0x08B06EFF) : const Color(0x06B06EFF), isDark ? const Color(0x18B06EFF) : const Color(0x10B06EFF), t)!],
+          )));
+        })),
+        Positioned(top: -60, right: -60, child: AnimatedBuilder(animation: ambient, builder: (_, __) {
+          final t = CurvedAnimation(parent: ambient, curve: Curves.easeInOutSine).value;
+          return Opacity(opacity: 0.06 + t * 0.06, child: Container(width: 320, height: 320, decoration: BoxDecoration(shape: BoxShape.circle, border: Border.all(color: kAccent, width: 1.5))));
+        })),
+        Positioned(bottom: -80, left: -80, child: AnimatedBuilder(animation: ambient, builder: (_, __) {
+          final t = CurvedAnimation(parent: ambient, curve: Curves.easeInOutSine).value;
+          return Opacity(opacity: 0.04 + t * 0.04, child: Container(width: 240, height: 240, decoration: BoxDecoration(shape: BoxShape.circle, border: Border.all(color: kAccent, width: 1))));
+        })),
+        Padding(
+          padding: EdgeInsets.fromLTRB(16, w >= 900 ? 56 : 36, 16, w >= 900 ? 56 : 40),
+          child: Column(crossAxisAlignment: CrossAxisAlignment.center, children: [
+            AnimatedBuilder(animation: avatarPulse, builder: (_, __) {
+              final t = CurvedAnimation(parent: avatarPulse, curve: Curves.easeInOutSine).value;
+              return Container(
+                width: 110, height: 110,
+                decoration: BoxDecoration(shape: BoxShape.circle,
+                  gradient: SweepGradient(colors: [kAccent, Color.lerp(kAccent, const Color(0xFF7C3AED), t)!, kAccent]),
+                  boxShadow: [BoxShadow(color: kAccent.withValues(alpha: 0.25 + t * 0.2), blurRadius: 20 + t * 10)]),
+                padding: const EdgeInsets.all(3),
+                child: Container(
+                  decoration: BoxDecoration(shape: BoxShape.circle, color: isDark ? const Color(0xFF0A0E14) : Colors.white),
+                  child: Center(child: Text(kHeroNameFirst.trim().substring(0, 1) + kHeroNameAccent.substring(0, 1),
+                    style: TextStyle(fontSize: 36, fontWeight: FontWeight.w800, color: cs.primary, letterSpacing: -1))),
+                ),
+              );
+            }).animate().fadeIn(duration: 600.ms, curve: Curves.easeOutCubic).scale(begin: const Offset(0.7, 0.7), curve: Curves.easeOutBack),
+            SizedBox(height: w >= 900 ? 24 : 18),
+            Text.rich(TextSpan(children: [
+              TextSpan(text: kHeroNameFirst, style: headlineStyle.copyWith(color: cs.onSurface)),
+              TextSpan(text: kHeroNameAccent, style: headlineStyle.copyWith(color: cs.primary)),
+            ]), textAlign: TextAlign.center).animate().fadeIn(delay: 150.ms, duration: 550.ms, curve: Curves.easeOutCubic).slideY(begin: 0.06, end: 0, curve: Curves.easeOutCubic),
+            SizedBox(height: w >= 900 ? 14 : 10),
+            SizedBox(height: 32, child: Row(mainAxisAlignment: MainAxisAlignment.center, children: [
+              Text(displayedRole, style: TextStyle(fontSize: w >= 900 ? 20 : 17, color: cs.primary, fontWeight: FontWeight.w600, height: 1.4)),
+              BlinkingCursor(color: cs.primary),
+            ])).animate().fadeIn(delay: 250.ms, duration: 500.ms),
+            SizedBox(height: w >= 900 ? 10 : 8),
+            Text(kPortfolioLocation, textAlign: TextAlign.center, style: TextStyle(fontSize: w >= 900 ? 15 : 13, color: muted, fontWeight: FontWeight.w500)).animate().fadeIn(delay: 300.ms, duration: 500.ms),
+            SizedBox(height: w >= 900 ? 16 : 12),
+            Padding(padding: const EdgeInsets.symmetric(horizontal: 8), child: Text(kHeroTagline, textAlign: TextAlign.center, style: TextStyle(fontSize: w >= 900 ? 17 : 15, color: muted, height: 1.6, fontWeight: FontWeight.w400)))
+                .animate().fadeIn(delay: 350.ms, duration: 550.ms).slideY(begin: 0.1, end: 0, curve: Curves.easeOutCubic),
+            SizedBox(height: w >= 900 ? 20 : 14),
+            HeroStats(cs: cs).animate().fadeIn(delay: 420.ms, duration: 500.ms).slideY(begin: 0.08, end: 0, curve: Curves.easeOutCubic),
+            SizedBox(height: w >= 900 ? 32 : 24),
+            Wrap(alignment: WrapAlignment.center, spacing: 14, runSpacing: 14, children: [
+              FilledButton.icon(onPressed: widget.onWork, icon: const Icon(Icons.work_outline_rounded, size: 18), label: const Text('View My Work'),
+                style: FilledButton.styleFrom(padding: EdgeInsets.symmetric(horizontal: w >= 900 ? 28 : 22, vertical: w >= 900 ? 15 : 13), textStyle: TextStyle(fontSize: w >= 900 ? 15 : 14, fontWeight: FontWeight.w600), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)))),
+              OutlinedButton.icon(onPressed: widget.onContact, icon: const Icon(Icons.mail_outline_rounded, size: 18), label: const Text('Contact Me'),
+                style: OutlinedButton.styleFrom(padding: EdgeInsets.symmetric(horizontal: w >= 900 ? 28 : 22, vertical: w >= 900 ? 15 : 13), textStyle: TextStyle(fontSize: w >= 900 ? 15 : 14, fontWeight: FontWeight.w600), foregroundColor: cs.onSurface, side: BorderSide(color: cs.onSurface.withValues(alpha: 0.35)), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)))),
+            ]).animate().fadeIn(delay: 480.ms, duration: 450.ms).scale(begin: const Offset(0.96, 0.96), curve: Curves.easeOutBack),
+            const SizedBox(height: 28),
+            Row(mainAxisAlignment: MainAxisAlignment.center, children: [
+              SocialIconBtn(tooltip: 'LinkedIn', icon: Icons.work_outline_rounded, onTap: widget.onLinkedIn),
+              SocialIconBtn(tooltip: 'GitHub', icon: Icons.code_rounded, onTap: widget.onGithub),
+              SocialIconBtn(tooltip: 'Email', icon: Icons.mail_outline_rounded, onTap: widget.onEmail),
+            ]).animate().fadeIn(delay: 540.ms, duration: 450.ms).slideY(begin: 0.12, end: 0, curve: Curves.easeOutCubic),
+            const SizedBox(height: 40),
+            ScrollDownCue(onTap: widget.onScrollDown, color: cs.primary).animate().fadeIn(delay: 650.ms, duration: 500.ms).scale(begin: const Offset(0.85, 0.85), curve: Curves.easeOutBack),
+          ]),
+        ),
+      ]),
     );
   }
 }
 
-class _HeroSocialIcon extends StatelessWidget {
-  const _HeroSocialIcon({
-    required this.tooltip,
-    required this.icon,
-    required this.onTap,
-  });
+class BlinkingCursor extends StatefulWidget {
+  const BlinkingCursor({super.key, required this.color});
+  final Color color;
+  @override
+  State<BlinkingCursor> createState() => _BlinkingCursorState();
+}
+class _BlinkingCursorState extends State<BlinkingCursor> with SingleTickerProviderStateMixin {
+  late AnimationController ctrl;
+  @override
+  void initState() { super.initState(); ctrl = AnimationController(vsync: this, duration: const Duration(milliseconds: 600))..repeat(reverse: true); }
+  @override
+  void dispose() { ctrl.dispose(); super.dispose(); }
+  @override
+  Widget build(BuildContext context) => AnimatedBuilder(animation: ctrl, builder: (_, __) => Opacity(opacity: ctrl.value > 0.5 ? 1.0 : 0.0, child: Container(width: 2, height: 22, margin: const EdgeInsets.only(left: 2), color: widget.color)));
+}
 
+class HeroStats extends StatelessWidget {
+  const HeroStats({super.key, required this.cs});
+  final ColorScheme cs;
+  @override
+  Widget build(BuildContext context) {
+    final stats = [('4+', 'Years'), ('25+', 'Apps'), ('3', 'Companies')];
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
+      decoration: BoxDecoration(borderRadius: BorderRadius.circular(14), color: kAccent.withValues(alpha: 0.08), border: Border.all(color: kAccent.withValues(alpha: 0.2))),
+      child: Row(mainAxisSize: MainAxisSize.min, children: stats.asMap().entries.map((e) {
+        final isLast = e.key == stats.length - 1;
+        return Row(children: [
+          Column(children: [
+            Text(e.value.$1, style: TextStyle(fontSize: 22, fontWeight: FontWeight.w800, color: cs.primary)),
+            Text(e.value.$2, style: const TextStyle(fontSize: 12, color: kMutedColor)),
+          ]),
+          if (!isLast) Container(width: 1, height: 32, margin: const EdgeInsets.symmetric(horizontal: 20), color: kAccent.withValues(alpha: 0.3)),
+        ]);
+      }).toList()),
+    );
+  }
+}
+
+class SocialIconBtn extends StatefulWidget {
+  const SocialIconBtn({super.key, required this.tooltip, required this.icon, required this.onTap});
   final String tooltip;
   final IconData icon;
   final VoidCallback onTap;
-
+  @override
+  State<SocialIconBtn> createState() => _SocialIconBtnState();
+}
+class _SocialIconBtnState extends State<SocialIconBtn> {
+  bool hover = false;
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 6),
-      child: IconButton(
-        tooltip: tooltip,
-        onPressed: onTap,
-        style: IconButton.styleFrom(
-          backgroundColor: cs.onSurface.withValues(alpha: 0.08),
-          foregroundColor: cs.onSurface.withValues(alpha: 0.85),
-        ),
-        icon: Icon(icon, size: 22),
+    return Padding(padding: const EdgeInsets.symmetric(horizontal: 6), child: MouseRegion(
+      onEnter: (_) => setState(() => hover = true),
+      onExit: (_) => setState(() => hover = false),
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 180),
+        decoration: BoxDecoration(shape: BoxShape.circle, color: hover ? cs.primary.withValues(alpha: 0.15) : cs.onSurface.withValues(alpha: 0.08), border: Border.all(color: hover ? cs.primary.withValues(alpha: 0.5) : Colors.transparent)),
+        child: IconButton(tooltip: widget.tooltip, onPressed: widget.onTap, icon: Icon(widget.icon, size: 22), color: hover ? cs.primary : cs.onSurface.withValues(alpha: 0.85)),
       ),
-    );
+    ));
   }
 }
 
-class _ScrollDownCue extends StatelessWidget {
-  const _ScrollDownCue({required this.onTap, required this.color});
+class ScrollDownCue extends StatefulWidget {
+  const ScrollDownCue({super.key, required this.onTap, required this.color});
   final VoidCallback onTap;
   final Color color;
-
+  @override
+  State<ScrollDownCue> createState() => _ScrollDownCueState();
+}
+class _ScrollDownCueState extends State<ScrollDownCue> with SingleTickerProviderStateMixin {
+  late AnimationController bounce;
+  @override
+  void initState() { super.initState(); bounce = AnimationController(vsync: this, duration: const Duration(milliseconds: 900))..repeat(reverse: true); }
+  @override
+  void dispose() { bounce.dispose(); super.dispose(); }
   @override
   Widget build(BuildContext context) {
-    return MouseRegion(
-      cursor: SystemMouseCursors.click,
-      child: GestureDetector(
-        onTap: onTap,
-        child: Column(
-          children: [
-            Container(
-              width: 44,
-              height: 44,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                border: Border.all(color: color.withValues(alpha: 0.65), width: 2),
-                color: color.withValues(alpha: 0.12),
-              ),
-              child: Icon(Icons.keyboard_arrow_down_rounded, color: color, size: 28),
-            ),
-          ],
-        ),
-      ),
-    );
+    return MouseRegion(cursor: SystemMouseCursors.click, child: GestureDetector(onTap: widget.onTap, child: AnimatedBuilder(animation: bounce, builder: (_, __) {
+      final t = CurvedAnimation(parent: bounce, curve: Curves.easeInOutSine).value;
+      return Transform.translate(offset: Offset(0, t * 5), child: Container(width: 44, height: 44,
+        decoration: BoxDecoration(shape: BoxShape.circle, border: Border.all(color: widget.color.withValues(alpha: 0.65), width: 2), color: widget.color.withValues(alpha: 0.12)),
+        child: Icon(Icons.keyboard_arrow_down_rounded, color: widget.color, size: 28)));
+    })));
   }
 }
 
-class _SectionTitle extends StatelessWidget {
-  const _SectionTitle(this.title, this.subtitle);
-  final String title;
-  final String subtitle;
-
+class SectionTitle extends StatelessWidget {
+  const SectionTitle(this.title, this.subtitle);
+  final String title, subtitle;
   @override
   Widget build(BuildContext context) {
-    const muted = Color(0xFF8B9BB4);
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          title,
-          style: Theme.of(context).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.w700),
-        ),
-        const SizedBox(height: 6),
-        Text(subtitle, style: const TextStyle(color: muted, height: 1.5)),
-        const SizedBox(height: 20),
-      ],
-    );
-  }
-}
-
-class _AboutSection extends StatelessWidget {
-  const _AboutSection({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        const _SectionTitle(
-          'About me',
-          'Professional summary—Android engineering, architecture, integrations, and how I ship with teams.',
-        )
-            .animate()
-            .fadeIn(duration: 480.ms, curve: Curves.easeOutCubic)
-            .slideY(begin: 0.1, end: 0, curve: Curves.easeOutCubic),
-        Text(
-          kAboutIntro,
-          style: TextStyle(
-            color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.78),
-            height: 1.55,
-            fontSize: 16,
-          ),
-        )
-            .animate()
-            .fadeIn(delay: 80.ms, duration: 500.ms)
-            .slideY(begin: 0.06, end: 0, curve: Curves.easeOutCubic),
-        const SizedBox(height: 18),
-        ...kProfessionalSummaryBullets.asMap().entries.map((e) {
-          return Padding(
-            padding: const EdgeInsets.only(bottom: 10),
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  '• ',
-                  style: TextStyle(
-                    color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.9),
-                    fontWeight: FontWeight.w700,
-                  ),
-                ),
-                Expanded(
-                  child: Text(
-                    e.value,
-                    style: TextStyle(
-                      color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.76),
-                      height: 1.5,
-                      fontSize: 15,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          )
-              .animate()
-              .fadeIn(delay: (120 + e.key * 40).ms, duration: 420.ms, curve: Curves.easeOutCubic)
-              .slideX(begin: -0.02, end: 0, curve: Curves.easeOutCubic);
-        }),
-        const SizedBox(height: 20),
-        LayoutBuilder(
-          builder: (context, c) {
-            final cols = c.maxWidth > 900 ? 3 : (c.maxWidth > 560 ? 2 : 1);
-            return GridView.builder(
-              shrinkWrap: true,
-              physics: const NeverScrollableScrollPhysics(),
-              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: cols,
-                crossAxisSpacing: 12,
-                mainAxisSpacing: 12,
-                childAspectRatio: cols == 1 ? 1.35 : 1.15,
-              ),
-              itemCount: kAboutHighlights.length,
-              itemBuilder: (context, i) {
-                final h = kAboutHighlights[i];
-                return _InfoCard(title: h.title, body: h.body)
-                    .animate()
-                    .fadeIn(delay: (100 + i * 70).ms, duration: 450.ms, curve: Curves.easeOutCubic)
-                    .slideY(begin: 0.12, end: 0, curve: Curves.easeOutCubic);
-              },
-            );
-          },
-        ),
-      ],
-    );
-  }
-}
-
-class _InfoCard extends StatelessWidget {
-  const _InfoCard({required this.title, required this.body});
-  final String title;
-  final String body;
-
-  @override
-  Widget build(BuildContext context) {
-    const muted = Color(0xFF8B9BB4);
-    return _HoverLift(
-      child: Card(
-        child: Padding(
-          padding: const EdgeInsets.all(18),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(title, style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 16)),
-              const SizedBox(height: 8),
-              Expanded(child: Text(body, style: const TextStyle(color: muted, height: 1.45, fontSize: 14))),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _JourneySection extends StatelessWidget {
-  const _JourneySection({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        const _SectionTitle(
-          'Professional journey',
-          'Roles, responsibilities, and flagship work—similar to a résumé timeline.',
-        )
-            .animate()
-            .fadeIn(duration: 480.ms)
-            .slideY(begin: 0.08, end: 0, curve: Curves.easeOutCubic),
-        ...kJobs.asMap().entries.map((e) {
-          return Padding(
-            padding: EdgeInsets.only(bottom: e.key == kJobs.length - 1 ? 0 : 12),
-            child: _JobBlock(job: e.value)
-                .animate()
-                .fadeIn(delay: (120 + e.key * 100).ms, duration: 500.ms, curve: Curves.easeOutCubic)
-                .slideY(begin: 0.1, end: 0, curve: Curves.easeOutCubic),
-          );
-        }),
-      ],
-    );
-  }
-}
-
-class _JobBlock extends StatelessWidget {
-  const _JobBlock({required this.job});
-  final JobEntry job;
-
-  @override
-  Widget build(BuildContext context) {
-    const muted = Color(0xFF8B9BB4);
     final cs = Theme.of(context).colorScheme;
-    return _HoverLift(
-      child: Card(
-        child: Padding(
-          padding: const EdgeInsets.all(20),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(job.title, style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 17)),
-                        const SizedBox(height: 2),
-                        Text(job.company, style: TextStyle(color: cs.primary, fontWeight: FontWeight.w600, fontSize: 14)),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  Flexible(
-                    child: Text(job.meta, textAlign: TextAlign.end, style: const TextStyle(color: muted, fontSize: 13)),
-                  ),
-                ],
-              ),
-            const SizedBox(height: 8),
-            Text(job.summary, style: const TextStyle(color: muted, fontSize: 14, height: 1.45)),
-            if (job.bullets.isNotEmpty) ...[
-              const SizedBox(height: 10),
-              const Text('Responsibilities', style: TextStyle(fontWeight: FontWeight.w700, fontSize: 13)),
-              const SizedBox(height: 6),
-              ...job.bullets.map(
-                (b) => Padding(
-                  padding: const EdgeInsets.only(bottom: 6),
-                  child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const Text('• ', style: TextStyle(color: muted)),
-                      Expanded(child: Text(b, style: const TextStyle(color: muted, height: 1.45))),
-                    ],
-                  ),
-                ),
-              ),
+    return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+      Row(children: [
+        Container(width: 4, height: 28, decoration: BoxDecoration(color: cs.primary, borderRadius: BorderRadius.circular(2))),
+        const SizedBox(width: 12),
+        Text(title, style: Theme.of(context).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.w700)),
+      ]),
+      const SizedBox(height: 8),
+      Padding(padding: const EdgeInsets.only(left: 16), child: Text(subtitle, style: const TextStyle(color: kMutedColor, height: 1.5))),
+      const SizedBox(height: 24),
+    ]);
+  }
+}
+
+class AboutSection extends StatelessWidget {
+  const AboutSection({super.key});
+  @override
+  Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+      const SectionTitle('About Me', 'Passionate Android engineer with a track record of shipping quality apps.')
+          .animate().fadeIn(duration: 480.ms, curve: Curves.easeOutCubic).slideY(begin: 0.1, end: 0, curve: Curves.easeOutCubic),
+      Text(kAboutIntro, style: TextStyle(color: cs.onSurface.withValues(alpha: 0.78), height: 1.6, fontSize: 16))
+          .animate().fadeIn(delay: 80.ms, duration: 500.ms).slideY(begin: 0.06, end: 0, curve: Curves.easeOutCubic),
+      const SizedBox(height: 18),
+      ...kProfessionalSummaryBullets.asMap().entries.map((e) => Padding(
+        padding: const EdgeInsets.only(bottom: 10),
+        child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
+          Icon(Icons.check_circle_outline_rounded, size: 18, color: cs.primary),
+          const SizedBox(width: 10),
+          Expanded(child: Text(e.value, style: TextStyle(color: cs.onSurface.withValues(alpha: 0.76), height: 1.5, fontSize: 15))),
+        ]),
+      ).animate().fadeIn(delay: (120 + e.key * 40).ms, duration: 420.ms, curve: Curves.easeOutCubic).slideX(begin: -0.02, end: 0, curve: Curves.easeOutCubic)),
+      const SizedBox(height: 24),
+      LayoutBuilder(builder: (context, c) {
+        final cols = c.maxWidth > 900 ? 3 : (c.maxWidth > 560 ? 2 : 1);
+        return GridView.builder(
+          shrinkWrap: true, physics: const NeverScrollableScrollPhysics(),
+          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: cols, crossAxisSpacing: 12, mainAxisSpacing: 12, childAspectRatio: cols == 1 ? 1.5 : 1.2),
+          itemCount: kAboutHighlights.length,
+          itemBuilder: (context, i) => InfoCard(title: kAboutHighlights[i].title, body: kAboutHighlights[i].body, index: i)
+              .animate().fadeIn(delay: (100 + i * 70).ms, duration: 450.ms, curve: Curves.easeOutCubic).slideY(begin: 0.12, end: 0, curve: Curves.easeOutCubic),
+        );
+      }),
+    ]);
+  }
+}
+
+class InfoCard extends StatelessWidget {
+  const InfoCard({super.key, required this.title, required this.body, required this.index});
+  final String title, body;
+  final int index;
+  static const icons = [Icons.architecture_rounded, Icons.apps_rounded, Icons.integration_instructions_rounded, Icons.speed_rounded, Icons.map_rounded, Icons.groups_rounded];
+  @override
+  Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    return HoverLift(child: Card(child: Padding(padding: const EdgeInsets.all(18), child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+      Container(width: 40, height: 40, decoration: BoxDecoration(color: cs.primary.withValues(alpha: 0.12), borderRadius: BorderRadius.circular(10)), child: Icon(icons[index % icons.length], color: cs.primary, size: 22)),
+      const SizedBox(height: 12),
+      Text(title, style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 15)),
+      const SizedBox(height: 6),
+      Expanded(child: Text(body, style: const TextStyle(color: kMutedColor, height: 1.45, fontSize: 13))),
+    ]))));
+  }
+}
+
+class JourneySection extends StatelessWidget {
+  const JourneySection({super.key});
+  @override
+  Widget build(BuildContext context) => Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+    const SectionTitle('Professional Journey', 'A timeline of growth, leadership, and technical excellence.')
+        .animate().fadeIn(duration: 480.ms).slideY(begin: 0.08, end: 0, curve: Curves.easeOutCubic),
+    ...kJobs.asMap().entries.map((e) => Padding(
+      padding: EdgeInsets.only(bottom: e.key == kJobs.length - 1 ? 0 : 16),
+      child: JobBlock(job: e.value, index: e.key).animate().fadeIn(delay: (120 + e.key * 100).ms, duration: 500.ms, curve: Curves.easeOutCubic).slideY(begin: 0.1, end: 0, curve: Curves.easeOutCubic),
+    )),
+  ]);
+}
+
+class JobBlock extends StatefulWidget {
+  const JobBlock({super.key, required this.job, this.index = 0});
+  final JobEntry job;
+  final int index;
+  @override
+  State<JobBlock> createState() => _JobBlockState();
+}
+class _JobBlockState extends State<JobBlock> {
+  bool expanded = false;
+  @override
+  Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    return HoverLift(child: Card(child: IntrinsicHeight(child: Row(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+      Container(width: 4, decoration: BoxDecoration(color: cs.primary, borderRadius: const BorderRadius.only(topLeft: Radius.circular(12), bottomLeft: Radius.circular(12)))),
+      Expanded(child: Padding(padding: const EdgeInsets.all(20), child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+        Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
+          Container(width: 44, height: 44, decoration: BoxDecoration(color: cs.primary.withValues(alpha: 0.12), borderRadius: BorderRadius.circular(10), border: Border.all(color: cs.primary.withValues(alpha: 0.2))),
+            child: Center(child: Text(widget.job.company.substring(0, 1), style: TextStyle(fontSize: 18, fontWeight: FontWeight.w800, color: cs.primary)))),
+          const SizedBox(width: 14),
+          Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+            Text(widget.job.title, style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 17)),
+            const SizedBox(height: 2),
+            Text(widget.job.company, style: TextStyle(color: cs.primary, fontWeight: FontWeight.w600, fontSize: 14)),
+            const SizedBox(height: 2),
+            Text(widget.job.meta, style: const TextStyle(color: kMutedColor, fontSize: 13)),
+          ])),
+          IconButton(onPressed: () => setState(() => expanded = !expanded),
+            icon: AnimatedRotation(turns: expanded ? 0.5 : 0, duration: const Duration(milliseconds: 250), child: const Icon(Icons.keyboard_arrow_down_rounded)),
+            color: cs.onSurface.withValues(alpha: 0.5)),
+        ]),
+        const SizedBox(height: 10),
+        Text(widget.job.summary, style: const TextStyle(color: kMutedColor, fontSize: 14, height: 1.5)),
+        const SizedBox(height: 10),
+        Wrap(spacing: 6, runSpacing: 6, children: widget.job.tags.map((t) => SkillTag(t)).toList()),
+        AnimatedCrossFade(
+          firstChild: const SizedBox.shrink(),
+          secondChild: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+            if (widget.job.bullets.isNotEmpty) ...[
+              const SizedBox(height: 16),
+              Container(padding: const EdgeInsets.all(14), decoration: BoxDecoration(color: isDark ? const Color(0x0AFFFFFF) : const Color(0x06000000), borderRadius: BorderRadius.circular(10)),
+                child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                  Text('Key Responsibilities', style: TextStyle(fontWeight: FontWeight.w700, fontSize: 13, color: cs.primary)),
+                  const SizedBox(height: 8),
+                  ...widget.job.bullets.map((b) => Padding(padding: const EdgeInsets.only(bottom: 6), child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                    Icon(Icons.arrow_right_rounded, size: 18, color: cs.primary),
+                    Expanded(child: Text(b, style: const TextStyle(color: kMutedColor, height: 1.45, fontSize: 13))),
+                  ]))),
+                ])),
             ],
-            if (job.topProjects.isNotEmpty) ...[
+            if (widget.job.topProjects.isNotEmpty) ...[
               const SizedBox(height: 12),
-              Text('Top projects', style: TextStyle(fontWeight: FontWeight.w700, fontSize: 13, color: cs.primary)),
+              Text('Top Projects', style: TextStyle(fontWeight: FontWeight.w700, fontSize: 13, color: cs.primary)),
               const SizedBox(height: 8),
-              ...job.topProjects.map(
-                (p) => Padding(
-                  padding: const EdgeInsets.only(bottom: 10),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(p.name, style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 14)),
-                      const SizedBox(height: 2),
-                      Text(p.detail, style: const TextStyle(color: muted, height: 1.45, fontSize: 13)),
-                    ],
-                  ),
-                ),
-              ),
+              ...widget.job.topProjects.map((p) => Padding(padding: const EdgeInsets.only(bottom: 10), child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                Container(width: 6, height: 6, margin: const EdgeInsets.only(top: 6, right: 10), decoration: BoxDecoration(color: cs.primary, shape: BoxShape.circle)),
+                Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                  Text(p.name, style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 14)),
+                  const SizedBox(height: 2),
+                  Text(p.detail, style: const TextStyle(color: kMutedColor, height: 1.45, fontSize: 13)),
+                ])),
+              ]))),
             ],
-            const SizedBox(height: 8),
-            Wrap(
-              spacing: 6,
-              runSpacing: 6,
-              children: job.tags.map((t) => _Tag(t)).toList(),
-            ),
-          ],
+          ]),
+          crossFadeState: expanded ? CrossFadeState.showSecond : CrossFadeState.showFirst,
+          duration: const Duration(milliseconds: 300),
         ),
-      ),
-    ),
-    );
+      ]))),
+    ]))));
   }
 }
 
-class _Tag extends StatelessWidget {
-  const _Tag(this.text);
+class SkillTag extends StatelessWidget {
+  const SkillTag(this.text);
   final String text;
-
   @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-      decoration: BoxDecoration(
-        color: const Color(0x263DD6C6),
-        borderRadius: BorderRadius.circular(6),
-      ),
-      child: Text(
-        text,
-        style: const TextStyle(
-          color: Color(0xFF3DD6C6),
-          fontSize: 12,
-          fontWeight: FontWeight.w600,
-        ),
-      ),
-    );
-  }
+  Widget build(BuildContext context) => Container(
+    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+    decoration: BoxDecoration(color: const Color(0x263DD6C6), borderRadius: BorderRadius.circular(6)),
+    child: Text(text, style: const TextStyle(color: kAccent, fontSize: 12, fontWeight: FontWeight.w600)),
+  );
 }
 
-class _ProjectsSection extends StatelessWidget {
-  const _ProjectsSection({super.key});
-
+class ProjectsSection extends StatelessWidget {
+  const ProjectsSection({super.key});
   @override
-  Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        const _SectionTitle(
-          'Featured projects',
-          'Highlights across remote control, media, AI, AR, productivity, and education.',
-        )
-            .animate()
-            .fadeIn(duration: 480.ms)
-            .slideY(begin: 0.08, end: 0, curve: Curves.easeOutCubic),
-        LayoutBuilder(
-          builder: (context, c) {
-            final cols = c.maxWidth > 900 ? 3 : (c.maxWidth > 560 ? 2 : 1);
-            return GridView.builder(
-              shrinkWrap: true,
-              physics: const NeverScrollableScrollPhysics(),
-              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: cols,
-                crossAxisSpacing: 12,
-                mainAxisSpacing: 12,
-                childAspectRatio: cols == 1 ? 1.02 : 0.98,
-              ),
-              itemCount: kFeaturedProjects.length,
-              itemBuilder: (context, i) {
-                final p = kFeaturedProjects[i];
-                return _ProjectCard(
-                  badge: p.badge,
-                  name: p.name,
-                  desc: p.desc,
-                  tags: p.tags,
-                )
-                    .animate()
-                    .fadeIn(delay: (80 + i * 55).ms, duration: 480.ms, curve: Curves.easeOutCubic)
-                    .slideY(begin: 0.12, end: 0, curve: Curves.easeOutCubic);
-              },
-            );
-          },
-        ),
-      ],
-    );
-  }
+  Widget build(BuildContext context) => Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+    const SectionTitle('Featured Projects', 'Highlights across remote control, media, AI, AR, productivity, and education.')
+        .animate().fadeIn(duration: 480.ms).slideY(begin: 0.08, end: 0, curve: Curves.easeOutCubic),
+    LayoutBuilder(builder: (context, c) {
+      final cols = c.maxWidth > 900 ? 3 : (c.maxWidth > 560 ? 2 : 1);
+      return GridView.builder(
+        shrinkWrap: true, physics: const NeverScrollableScrollPhysics(),
+        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: cols, crossAxisSpacing: 14, mainAxisSpacing: 14, childAspectRatio: cols == 1 ? 1.1 : 1.0),
+        itemCount: kFeaturedProjects.length,
+        itemBuilder: (context, i) {
+          final p = kFeaturedProjects[i];
+          return ProjectCard(badge: p.badge, name: p.name, desc: p.desc, tags: p.tags, index: i)
+              .animate().fadeIn(delay: (80 + i * 55).ms, duration: 480.ms, curve: Curves.easeOutCubic).slideY(begin: 0.12, end: 0, curve: Curves.easeOutCubic);
+        },
+      );
+    }),
+  ]);
 }
 
-class _ProjectCard extends StatelessWidget {
-  const _ProjectCard({
-    required this.badge,
-    required this.name,
-    required this.desc,
-    required this.tags,
-  });
-
-  final String badge;
-  final String name;
-  final String desc;
+class ProjectCard extends StatefulWidget {
+  const ProjectCard({super.key, required this.badge, required this.name, required this.desc, required this.tags, required this.index});
+  final String badge, name, desc;
   final List<String> tags;
-
+  final int index;
+  @override
+  State<ProjectCard> createState() => _ProjectCardState();
+}
+class _ProjectCardState extends State<ProjectCard> {
+  bool hover = false;
+  static const gradients = [
+    [Color(0xFF3DD6C6), Color(0xFF2563EB)], [Color(0xFF7C3AED), Color(0xFF3DD6C6)],
+    [Color(0xFFEA580C), Color(0xFFEAB308)], [Color(0xFF2563EB), Color(0xFF7C3AED)],
+    [Color(0xFF16A34A), Color(0xFF3DD6C6)], [Color(0xFFDB2777), Color(0xFF7C3AED)],
+  ];
   @override
   Widget build(BuildContext context) {
-    const muted = Color(0xFF8B9BB4);
-    return _HoverLift(
-      child: Card(
-        child: Padding(
-          padding: const EdgeInsets.all(18),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                badge.toUpperCase(),
-                style: const TextStyle(
-                  fontSize: 10,
-                  fontWeight: FontWeight.w700,
-                  letterSpacing: 1.2,
-                  color: Color(0xFF3DD6C6),
-                ),
-              ),
-              const SizedBox(height: 6),
-              Text(name, style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 16)),
+    final cs = Theme.of(context).colorScheme;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final grad = gradients[widget.index % gradients.length];
+    return MouseRegion(
+      onEnter: (_) => setState(() => hover = true),
+      onExit: (_) => setState(() => hover = false),
+      child: AnimatedScale(scale: hover ? 1.013 : 1.0, duration: const Duration(milliseconds: 200), curve: Curves.easeOutCubic,
+        child: AnimatedContainer(duration: const Duration(milliseconds: 200),
+          decoration: BoxDecoration(borderRadius: BorderRadius.circular(14), boxShadow: hover ? [BoxShadow(color: grad[0].withValues(alpha: 0.2), blurRadius: 24)] : []),
+          child: Card(clipBehavior: Clip.antiAlias, child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+            Container(height: 6, decoration: BoxDecoration(gradient: LinearGradient(colors: grad))),
+            Expanded(child: Padding(padding: const EdgeInsets.all(18), child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+              Container(padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                decoration: BoxDecoration(color: grad[0].withValues(alpha: isDark ? 0.2 : 0.12), borderRadius: BorderRadius.circular(5)),
+                child: Text(widget.badge.toUpperCase(), style: TextStyle(fontSize: 10, fontWeight: FontWeight.w700, letterSpacing: 1.2, color: grad[0]))),
+              const SizedBox(height: 10),
+              Text(widget.name, style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 16)),
               const SizedBox(height: 8),
-              Expanded(child: Text(desc, style: const TextStyle(color: muted, height: 1.45, fontSize: 14))),
-              const SizedBox(height: 8),
-              Wrap(spacing: 6, runSpacing: 6, children: tags.map((t) => _Tag(t)).toList()),
-            ],
-          ),
-        ),
-      ),
+              Expanded(child: Text(widget.desc, style: const TextStyle(color: kMutedColor, height: 1.45, fontSize: 14))),
+              const SizedBox(height: 10),
+              Wrap(spacing: 6, runSpacing: 6, children: widget.tags.map((t) => SkillTag(t)).toList()),
+            ]))),
+          ])))),
     );
   }
 }
 
-class _SkillsSection extends StatelessWidget {
-  const _SkillsSection({super.key});
-
+class SkillsSection extends StatelessWidget {
+  const SkillsSection({super.key});
   @override
   Widget build(BuildContext context) {
     final groups = kSkillGroups;
     final mid = (groups.length / 2).ceil();
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        const _SectionTitle(
-          'Technical expertise',
-          'Languages, architecture, async, data, networking, and shipping—grouped like a skills matrix.',
-        )
-            .animate()
-            .fadeIn(duration: 480.ms)
-            .slideY(begin: 0.08, end: 0, curve: Curves.easeOutCubic),
-        LayoutBuilder(
-          builder: (context, c) {
-            if (c.maxWidth > 640) {
-              return Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Expanded(
-                    child: Column(
-                      children: [
-                        for (var i = 0; i < mid; i++)
-                          Padding(
-                            padding: const EdgeInsets.only(bottom: 12),
-                            child: _SkillGroup(title: groups[i].title, tags: groups[i].tags)
-                                .animate()
-                                .fadeIn(delay: (60 + i * 50).ms, duration: 450.ms)
-                                .slideX(begin: -0.03, end: 0, curve: Curves.easeOutCubic),
-                          ),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Column(
-                      children: [
-                        for (var i = mid; i < groups.length; i++)
-                          Padding(
-                            padding: const EdgeInsets.only(bottom: 12),
-                            child: _SkillGroup(title: groups[i].title, tags: groups[i].tags)
-                                .animate()
-                                .fadeIn(delay: (60 + (i - mid) * 50).ms, duration: 450.ms)
-                                .slideX(begin: 0.03, end: 0, curve: Curves.easeOutCubic),
-                          ),
-                      ],
-                    ),
-                  ),
-                ],
-              );
-            }
-            return Column(
-              children: [
-                for (var i = 0; i < groups.length; i++)
-                  Padding(
-                    padding: const EdgeInsets.only(bottom: 12),
-                    child: _SkillGroup(title: groups[i].title, tags: groups[i].tags)
-                        .animate()
-                        .fadeIn(delay: (50 + i * 45).ms, duration: 450.ms)
-                        .slideY(begin: 0.08, end: 0, curve: Curves.easeOutCubic),
-                  ),
-              ],
-            );
-          },
-        ),
-        const SizedBox(height: 20),
-        LayoutBuilder(
-          builder: (context, c) {
-            final w = (c.maxWidth - 36) / 4;
-            final cell = w.clamp(120.0, 200.0);
-            return Wrap(
-              spacing: 12,
-              runSpacing: 12,
-              children: [
-                for (var i = 0; i < kMetrics.length; i++)
-                  _Metric(cell, kMetrics[i].value, kMetrics[i].label)
-                      .animate()
-                      .fadeIn(delay: (200 + i * 80).ms, duration: 500.ms, curve: Curves.easeOutCubic)
-                      .scale(begin: const Offset(0.92, 0.92), curve: Curves.easeOutBack),
-              ],
-            );
-          },
-        ),
-      ],
-    );
+    return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+      const SectionTitle('Technical Expertise', 'Languages, architecture, async, data, networking, and shipping.')
+          .animate().fadeIn(duration: 480.ms).slideY(begin: 0.08, end: 0, curve: Curves.easeOutCubic),
+      LayoutBuilder(builder: (context, c) {
+        if (c.maxWidth > 640) {
+          return Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
+            Expanded(child: Column(children: [for (var i = 0; i < mid; i++) Padding(padding: const EdgeInsets.only(bottom: 12), child: SkillGroupCard(title: groups[i].title, tags: groups[i].tags).animate().fadeIn(delay: (60 + i * 50).ms, duration: 450.ms).slideX(begin: -0.03, end: 0, curve: Curves.easeOutCubic))])),
+            const SizedBox(width: 12),
+            Expanded(child: Column(children: [for (var i = mid; i < groups.length; i++) Padding(padding: const EdgeInsets.only(bottom: 12), child: SkillGroupCard(title: groups[i].title, tags: groups[i].tags).animate().fadeIn(delay: (60 + (i - mid) * 50).ms, duration: 450.ms).slideX(begin: 0.03, end: 0, curve: Curves.easeOutCubic))])),
+          ]);
+        }
+        return Column(children: [for (var i = 0; i < groups.length; i++) Padding(padding: const EdgeInsets.only(bottom: 12), child: SkillGroupCard(title: groups[i].title, tags: groups[i].tags).animate().fadeIn(delay: (50 + i * 45).ms, duration: 450.ms).slideY(begin: 0.08, end: 0, curve: Curves.easeOutCubic))]);
+      }),
+      const SizedBox(height: 24),
+      Wrap(spacing: 12, runSpacing: 12, children: [
+        for (var i = 0; i < kMetrics.length; i++)
+          MetricCard(value: kMetrics[i].value, label: kMetrics[i].label).animate().fadeIn(delay: (200 + i * 80).ms, duration: 500.ms, curve: Curves.easeOutCubic).scale(begin: const Offset(0.92, 0.92), curve: Curves.easeOutBack),
+      ]),
+    ]);
   }
 }
 
-class _SkillGroup extends StatelessWidget {
-  const _SkillGroup({required this.title, required this.tags});
+class SkillGroupCard extends StatelessWidget {
+  const SkillGroupCard({super.key, required this.title, required this.tags});
   final String title;
   final List<String> tags;
-
   @override
   Widget build(BuildContext context) {
-    const muted = Color(0xFF8B9BB4);
-    return _HoverLift(
-      scaleEnd: 1.008,
-      child: Card(
-        child: Padding(
-          padding: const EdgeInsets.all(16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(title, style: const TextStyle(color: muted, fontWeight: FontWeight.w600, fontSize: 13)),
-              const SizedBox(height: 10),
-              Wrap(spacing: 8, runSpacing: 8, children: tags.map((t) => _Tag(t)).toList()),
-            ],
-          ),
-        ),
-      ),
-    );
+    final cs = Theme.of(context).colorScheme;
+    return HoverLift(scaleEnd: 1.008, child: Card(child: Padding(padding: const EdgeInsets.all(16), child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+      Row(children: [
+        Container(width: 3, height: 14, decoration: BoxDecoration(color: cs.primary, borderRadius: BorderRadius.circular(2))),
+        const SizedBox(width: 8),
+        Text(title, style: const TextStyle(color: kMutedColor, fontWeight: FontWeight.w600, fontSize: 13)),
+      ]),
+      const SizedBox(height: 12),
+      Wrap(spacing: 8, runSpacing: 8, children: tags.map((t) => SkillTag(t)).toList()),
+    ]))));
   }
 }
 
-class _Metric extends StatelessWidget {
-  const _Metric(this.width, this.value, this.label);
-  final double width;
-  final String value;
-  final String label;
+class MetricCard extends StatelessWidget {
+  const MetricCard({super.key, required this.value, required this.label});
+  final String value, label;
+  @override
+  Widget build(BuildContext context) => SizedBox(width: 140, child: Card(
+    color: const Color(0x263DD6C6),
+    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12), side: const BorderSide(color: Color(0x403DD6C6))),
+    child: Padding(padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 8), child: Column(children: [
+      Text(value, style: const TextStyle(fontSize: 28, fontWeight: FontWeight.w800, color: kAccent), textAlign: TextAlign.center),
+      const SizedBox(height: 4),
+      Text(label, textAlign: TextAlign.center, style: const TextStyle(fontSize: 12, color: kMutedColor)),
+    ])),
+  ));
+}
 
+class EducationSection extends StatelessWidget {
+  const EducationSection({super.key});
   @override
   Widget build(BuildContext context) {
-    const muted = Color(0xFF8B9BB4);
-    return SizedBox(
-      width: width,
-      child: Card(
-        color: const Color(0x263DD6C6),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12),
-          side: const BorderSide(color: Color(0x403DD6C6)),
-        ),
-        child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 18, horizontal: 8),
-          child: Column(
-            children: [
-              Text(
-                value,
-                style: const TextStyle(fontSize: 26, fontWeight: FontWeight.w800, color: Color(0xFF3DD6C6)),
-                textAlign: TextAlign.center,
-              ),
-              const SizedBox(height: 4),
-              Text(label, textAlign: TextAlign.center, style: const TextStyle(fontSize: 12, color: muted)),
-            ],
-          ),
-        ),
-      ),
-    );
+    final cs = Theme.of(context).colorScheme;
+    return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+      const SectionTitle('Education', 'Formal training that underpins years of Android delivery.')
+          .animate().fadeIn(duration: 480.ms).slideY(begin: 0.08, end: 0, curve: Curves.easeOutCubic),
+      HoverLift(child: Card(child: IntrinsicHeight(child: Row(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+        Container(width: 4, decoration: BoxDecoration(color: cs.primary, borderRadius: const BorderRadius.only(topLeft: Radius.circular(12), bottomLeft: Radius.circular(12)))),
+        Expanded(child: Padding(padding: const EdgeInsets.all(20), child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
+          Container(width: 48, height: 48, decoration: BoxDecoration(color: cs.primary.withValues(alpha: 0.12), borderRadius: BorderRadius.circular(12)), child: Icon(Icons.school_rounded, color: cs.primary, size: 26)),
+          const SizedBox(width: 16),
+          Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+            Text(kEducationTitle, style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 17)),
+            const SizedBox(height: 4),
+            Text('The University of Poonch Rawalakot', style: TextStyle(color: cs.primary, fontWeight: FontWeight.w600, fontSize: 14)),
+            const SizedBox(height: 4),
+            Text(kEducationMeta, style: const TextStyle(color: kMutedColor, fontSize: 13)),
+            const SizedBox(height: 10),
+            Text(kEducationSummary, style: const TextStyle(color: kMutedColor, fontSize: 14, height: 1.5)),
+            const SizedBox(height: 12),
+            Wrap(spacing: 6, runSpacing: 6, children: ['Computer Science', 'Android', 'Software Engineering'].map((t) => SkillTag(t)).toList()),
+          ])),
+        ]))),
+      ])))).animate().fadeIn(delay: 100.ms, duration: 500.ms).slideY(begin: 0.1, end: 0, curve: Curves.easeOutCubic),
+    ]);
   }
 }
 
-class _EducationSection extends StatelessWidget {
-  const _EducationSection({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        const _SectionTitle(
-          'Education',
-          'Formal training that underpins years of Android delivery.',
-        )
-            .animate()
-            .fadeIn(duration: 480.ms)
-            .slideY(begin: 0.08, end: 0, curve: Curves.easeOutCubic),
-        _JobBlock(
-          job: JobEntry(
-            title: kEducationTitle,
-            company: 'The University of Poonch Rawalakot',
-            meta: kEducationMeta,
-            summary: kEducationSummary,
-            bullets: const [],
-            topProjects: const [],
-            tags: const ['Computer Science', 'Android', 'Software engineering'],
-          ),
-        ).animate().fadeIn(delay: 100.ms, duration: 500.ms).slideY(begin: 0.1, end: 0, curve: Curves.easeOutCubic),
-      ],
-    );
-  }
-}
-
-class _ConnectSection extends StatelessWidget {
-  const _ConnectSection({
-    super.key,
-    required this.muted,
-    required this.onGithub,
-    required this.onLinkedIn,
-    required this.onEmail,
-    required this.onPhone,
-  });
-
+class ConnectSection extends StatelessWidget {
+  const ConnectSection({super.key, required this.muted, required this.onGithub, required this.onLinkedIn, required this.onEmail, required this.onPhone});
   final Color muted;
-  final VoidCallback onGithub;
-  final VoidCallback onLinkedIn;
-  final VoidCallback onEmail;
-  final VoidCallback onPhone;
+  final VoidCallback onGithub, onLinkedIn, onEmail, onPhone;
+  @override
+  Widget build(BuildContext context) => Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+    const SectionTitle("Let's Connect", 'Available for roles that value solid Android craft.')
+        .animate().fadeIn(duration: 480.ms).slideY(begin: 0.08, end: 0, curve: Curves.easeOutCubic),
+    LayoutBuilder(builder: (context, c) {
+      final row = c.maxWidth > 720;
+      final linksCard = ContactCard(onEmail: onEmail, onPhone: onPhone, onLinkedIn: onLinkedIn, onGithub: onGithub).animate().fadeIn(duration: 500.ms).slideX(begin: -0.04, end: 0, curve: Curves.easeOutCubic);
+      final whyCard = WhyCard(muted: muted).animate().fadeIn(delay: 120.ms, duration: 500.ms).slideX(begin: 0.04, end: 0, curve: Curves.easeOutCubic);
+      if (row) return Row(crossAxisAlignment: CrossAxisAlignment.start, children: [Expanded(child: linksCard), const SizedBox(width: 16), Expanded(child: whyCard)]);
+      return Column(children: [linksCard, const SizedBox(height: 16), whyCard]);
+    }),
+  ]);
+}
 
+class ContactCard extends StatelessWidget {
+  const ContactCard({super.key, required this.onEmail, required this.onPhone, required this.onLinkedIn, required this.onGithub});
+  final VoidCallback onEmail, onPhone, onLinkedIn, onGithub;
   @override
   Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        const _SectionTitle(
-          'Let’s connect',
-          'Email, phone, LinkedIn, and GitHub—available for roles that value solid Android craft.',
-        )
-            .animate()
-            .fadeIn(duration: 480.ms)
-            .slideY(begin: 0.08, end: 0, curve: Curves.easeOutCubic),
-        LayoutBuilder(
-          builder: (context, c) {
-            final row = c.maxWidth > 720;
-            final linksCard = Card(
-              child: Padding(
-                padding: const EdgeInsets.all(20),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Text('Get in touch', style: TextStyle(fontWeight: FontWeight.w700, fontSize: 17)),
-                    const SizedBox(height: 12),
-                    _LinkRow(label: kPortfolioEmail, onTap: onEmail),
-                    _LinkRow(label: kPortfolioPhoneDisplay, onTap: onPhone),
-                    _LinkRow(label: 'LinkedIn profile', onTap: onLinkedIn),
-                    _LinkRow(label: 'GitHub — $kPortfolioGithubUser', onTap: onGithub),
-                    _LinkRow(
-                      label: kPortfolioLocation,
-                      onTap: () {
-                        unawaited(
-                          launchUrl(
-                            Uri.parse(
-                              'https://www.google.com/maps/search/?api=1&query=${Uri.encodeComponent(kPortfolioLocation)}',
-                            ),
-                            mode: LaunchMode.externalApplication,
-                          ),
-                        );
-                      },
-                    ),
-                  ],
-                ),
-              ),
-            ).animate().fadeIn(duration: 500.ms).slideX(begin: -0.04, end: 0, curve: Curves.easeOutCubic);
+    final items = [
+      (Icons.mail_outline_rounded, 'Email', kPortfolioEmail, onEmail),
+      (Icons.phone_outlined, 'Phone', kPortfolioPhoneDisplay, onPhone),
+      (Icons.work_outline_rounded, 'LinkedIn', 'linkedin.com/in/aliusmankhan077', onLinkedIn),
+      (Icons.code_rounded, 'GitHub', 'github.com/$kPortfolioGithubUser', onGithub),
+      (Icons.location_on_outlined, 'Location', kPortfolioLocation, () {}),
+    ];
+    return HoverLift(child: Card(child: Padding(padding: const EdgeInsets.all(20), child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+      const Text('Get in Touch', style: TextStyle(fontWeight: FontWeight.w700, fontSize: 17)),
+      const SizedBox(height: 16),
+      ...items.map((item) => ContactRow(icon: item.$1, label: item.$2, value: item.$3, onTap: item.$4)),
+    ]))));
+  }
+}
 
-            final whyCard = Card(
-              child: Padding(
-                padding: const EdgeInsets.all(20),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Text('Why work with me', style: TextStyle(fontWeight: FontWeight.w700, fontSize: 17)),
-                    const SizedBox(height: 10),
-                    ...kWhyWorkWithMe.map(
-                      (line) => Padding(
-                        padding: const EdgeInsets.only(bottom: 8),
-                        child: Row(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            const Text('• ', style: TextStyle(color: Color(0xFF8B9BB4))),
-                            Expanded(
-                              child: Text(line, style: TextStyle(color: muted, height: 1.45)),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ).animate().fadeIn(delay: 120.ms, duration: 500.ms).slideX(begin: 0.04, end: 0, curve: Curves.easeOutCubic);
-
-            if (row) {
-              return Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Expanded(child: linksCard),
-                  const SizedBox(width: 16),
-                  Expanded(child: whyCard),
-                ],
-              );
-            }
-            return Column(children: [linksCard, const SizedBox(height: 16), whyCard]);
-          },
-        ),
-      ],
+class ContactRow extends StatefulWidget {
+  const ContactRow({super.key, required this.icon, required this.label, required this.value, required this.onTap});
+  final IconData icon;
+  final String label, value;
+  final VoidCallback onTap;
+  @override
+  State<ContactRow> createState() => _ContactRowState();
+}
+class _ContactRowState extends State<ContactRow> {
+  bool hover = false;
+  @override
+  Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    return MouseRegion(
+      onEnter: (_) => setState(() => hover = true),
+      onExit: (_) => setState(() => hover = false),
+      child: InkWell(onTap: widget.onTap, borderRadius: BorderRadius.circular(10), child: AnimatedContainer(
+        duration: const Duration(milliseconds: 180),
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+        margin: const EdgeInsets.only(bottom: 6),
+        decoration: BoxDecoration(color: hover ? cs.primary.withValues(alpha: 0.08) : Colors.transparent, borderRadius: BorderRadius.circular(10)),
+        child: Row(children: [
+          Container(width: 36, height: 36, decoration: BoxDecoration(color: cs.primary.withValues(alpha: hover ? 0.2 : 0.1), borderRadius: BorderRadius.circular(8)), child: Icon(widget.icon, size: 18, color: cs.primary)),
+          const SizedBox(width: 12),
+          Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+            Text(widget.label, style: const TextStyle(fontSize: 11, color: kMutedColor, fontWeight: FontWeight.w500)),
+            Text(widget.value, style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500, color: hover ? cs.primary : null)),
+          ])),
+          Icon(Icons.open_in_new_rounded, size: 16, color: hover ? cs.primary : kMutedColor),
+        ]),
+      )),
     );
   }
 }
 
-class _LinkRow extends StatelessWidget {
-  const _LinkRow({required this.label, required this.onTap});
-  final String label;
-  final VoidCallback onTap;
-
+class WhyCard extends StatelessWidget {
+  const WhyCard({super.key, required this.muted});
+  final Color muted;
   @override
   Widget build(BuildContext context) {
-    return ListTile(
-      contentPadding: EdgeInsets.zero,
-      title: Text(label),
-      trailing: const Icon(Icons.open_in_new, size: 18),
-      onTap: onTap,
+    final cs = Theme.of(context).colorScheme;
+    return HoverLift(child: Card(child: Padding(padding: const EdgeInsets.all(20), child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+      const Text('Why Work With Me', style: TextStyle(fontWeight: FontWeight.w700, fontSize: 17)),
+      const SizedBox(height: 16),
+      ...kWhyWorkWithMe.asMap().entries.map((e) => Padding(padding: const EdgeInsets.only(bottom: 12), child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
+        Container(width: 28, height: 28, decoration: BoxDecoration(color: cs.primary.withValues(alpha: 0.12), borderRadius: BorderRadius.circular(7)), child: Center(child: Text('${e.key + 1}', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w800, color: cs.primary)))),
+        const SizedBox(width: 12),
+        Expanded(child: Text(e.value, style: TextStyle(color: muted, height: 1.5, fontSize: 14))),
+      ]))),
+    ]))));
+  }
+}
+
+class PortfolioFooter extends StatelessWidget {
+  const PortfolioFooter({super.key, required this.onLinkedIn, required this.onGithub, required this.onEmail});
+  final VoidCallback onLinkedIn, onGithub, onEmail;
+  @override
+  Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    return Container(
+      padding: const EdgeInsets.symmetric(vertical: 32, horizontal: 20),
+      decoration: BoxDecoration(border: Border(top: BorderSide(color: isDark ? const Color(0x14FFFFFF) : const Color(0x14000000)))),
+      child: Column(children: [
+        Text.rich(TextSpan(style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w700, letterSpacing: -0.5), children: [
+          TextSpan(text: kBrandFirst, style: TextStyle(color: cs.onSurface)),
+          TextSpan(text: kBrandAccent, style: TextStyle(color: cs.primary)),
+        ])),
+        const SizedBox(height: 8),
+        const Text(kHeroRole, style: TextStyle(color: kMutedColor, fontSize: 14)),
+        const SizedBox(height: 16),
+        Row(mainAxisAlignment: MainAxisAlignment.center, children: [
+          SocialIconBtn(tooltip: 'LinkedIn', icon: Icons.work_outline_rounded, onTap: onLinkedIn),
+          SocialIconBtn(tooltip: 'GitHub', icon: Icons.code_rounded, onTap: onGithub),
+          SocialIconBtn(tooltip: 'Email', icon: Icons.mail_outline_rounded, onTap: onEmail),
+        ]),
+        const SizedBox(height: 20),
+        Text('© ${DateTime.now().year} $kHeroName · Built with Flutter', textAlign: TextAlign.center, style: const TextStyle(color: kMutedColor, fontSize: 13)),
+      ]),
     );
   }
 }
