@@ -533,9 +533,16 @@ class AboutSection extends StatelessWidget {
       const SizedBox(height: 24),
       LayoutBuilder(builder: (context, c) {
         final cols = c.maxWidth > 900 ? 3 : (c.maxWidth > 560 ? 2 : 1);
+        if (cols == 1) {
+          return Column(children: List.generate(kAboutHighlights.length, (i) => Padding(
+            padding: const EdgeInsets.only(bottom: 12),
+            child: SizedBox(height: 130, child: InfoCard(title: kAboutHighlights[i].title, body: kAboutHighlights[i].body, index: i)
+                .animate().fadeIn(delay: (100 + i * 70).ms, duration: 450.ms, curve: Curves.easeOutCubic).slideY(begin: 0.12, end: 0, curve: Curves.easeOutCubic)),
+          )));
+        }
         return GridView.builder(
           shrinkWrap: true, physics: const NeverScrollableScrollPhysics(),
-          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: cols, crossAxisSpacing: 12, mainAxisSpacing: 12, childAspectRatio: cols == 1 ? 1.5 : 1.2),
+          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: cols, crossAxisSpacing: 12, mainAxisSpacing: 12, childAspectRatio: 1.15),
           itemCount: kAboutHighlights.length,
           itemBuilder: (context, i) => InfoCard(title: kAboutHighlights[i].title, body: kAboutHighlights[i].body, index: i)
               .animate().fadeIn(delay: (100 + i * 70).ms, duration: 450.ms, curve: Curves.easeOutCubic).slideY(begin: 0.12, end: 0, curve: Curves.easeOutCubic),
@@ -558,7 +565,7 @@ class InfoCard extends StatelessWidget {
       const SizedBox(height: 12),
       Text(title, style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 15)),
       const SizedBox(height: 6),
-      Expanded(child: Text(body, style: const TextStyle(color: kMutedColor, height: 1.45, fontSize: 13))),
+      Text(body, style: const TextStyle(color: kMutedColor, height: 1.45, fontSize: 13), maxLines: 4, overflow: TextOverflow.ellipsis),
     ]))));
   }
 }
@@ -667,9 +674,17 @@ class ProjectsSection extends StatelessWidget {
         .animate().fadeIn(duration: 480.ms).slideY(begin: 0.08, end: 0, curve: Curves.easeOutCubic),
     LayoutBuilder(builder: (context, c) {
       final cols = c.maxWidth > 900 ? 3 : (c.maxWidth > 560 ? 2 : 1);
+      if (cols == 1) {
+        return Column(children: List.generate(kFeaturedProjects.length, (i) {
+          final p = kFeaturedProjects[i];
+          return Padding(padding: const EdgeInsets.only(bottom: 14), child: SizedBox(height: 220,
+            child: ProjectCard(badge: p.badge, name: p.name, desc: p.desc, tags: p.tags, index: i)
+                .animate().fadeIn(delay: (80 + i * 55).ms, duration: 480.ms, curve: Curves.easeOutCubic).slideY(begin: 0.12, end: 0, curve: Curves.easeOutCubic)));
+        }));
+      }
       return GridView.builder(
         shrinkWrap: true, physics: const NeverScrollableScrollPhysics(),
-        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: cols, crossAxisSpacing: 14, mainAxisSpacing: 14, childAspectRatio: cols == 1 ? 1.1 : 1.0),
+        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: cols, crossAxisSpacing: 14, mainAxisSpacing: 14, childAspectRatio: 1.0),
         itemCount: kFeaturedProjects.length,
         itemBuilder: (context, i) {
           final p = kFeaturedProjects[i];
@@ -716,7 +731,7 @@ class _ProjectCardState extends State<ProjectCard> {
               const SizedBox(height: 10),
               Text(widget.name, style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 16)),
               const SizedBox(height: 8),
-              Expanded(child: Text(widget.desc, style: const TextStyle(color: kMutedColor, height: 1.45, fontSize: 14))),
+              Text(widget.desc, style: const TextStyle(color: kMutedColor, height: 1.45, fontSize: 14), maxLines: 4, overflow: TextOverflow.ellipsis),
               const SizedBox(height: 10),
               Wrap(spacing: 6, runSpacing: 6, children: widget.tags.map((t) => SkillTag(t)).toList()),
             ]))),
@@ -776,7 +791,7 @@ class MetricCard extends StatelessWidget {
   const MetricCard({super.key, required this.value, required this.label});
   final String value, label;
   @override
-  Widget build(BuildContext context) => SizedBox(width: 140, child: Card(
+  Widget build(BuildContext context) => SizedBox(width: 130, child: Card(
     color: const Color(0x263DD6C6),
     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12), side: const BorderSide(color: Color(0x403DD6C6))),
     child: Padding(padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 8), child: Column(children: [
@@ -826,7 +841,7 @@ class ConnectSection extends StatelessWidget {
     const SectionTitle("Let's Connect", 'Available for roles that value solid Android craft.')
         .animate().fadeIn(duration: 480.ms).slideY(begin: 0.08, end: 0, curve: Curves.easeOutCubic),
     LayoutBuilder(builder: (context, c) {
-      final row = c.maxWidth > 720;
+      final row = c.maxWidth > 640;
       final linksCard = ContactCard(onEmail: onEmail, onPhone: onPhone, onLinkedIn: onLinkedIn, onGithub: onGithub).animate().fadeIn(duration: 500.ms).slideX(begin: -0.04, end: 0, curve: Curves.easeOutCubic);
       final whyCard = WhyCard(muted: muted).animate().fadeIn(delay: 120.ms, duration: 500.ms).slideX(begin: 0.04, end: 0, curve: Curves.easeOutCubic);
       if (row) return Row(crossAxisAlignment: CrossAxisAlignment.start, children: [Expanded(child: linksCard), const SizedBox(width: 16), Expanded(child: whyCard)]);
