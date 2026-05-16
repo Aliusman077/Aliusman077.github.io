@@ -542,7 +542,6 @@ class HeroStats extends StatelessWidget {
     final stats = [
       ('4+', 'Years'),
       ('25+', 'Apps'),
-      ('500K+', 'FitFlex DLs'),
       ('3', 'Companies'),
     ];
     final statTile = (String v, String l) => Padding(

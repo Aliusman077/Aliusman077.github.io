@@ -111,8 +111,8 @@ const List<JobEntry> kJobs = [
       TopProject(
         name: 'FitFlex',
         detail:
-            'Switch Communications fitness VAS—500K+ downloads, 4.0 rating. Personalized workouts (2,000+ exercises), '
-            'meal plans, AI food scanner, and nutrition tracking. Operator billing on Jazz and Zong. Android support.',
+            'Switch Communications fitness VAS—personalized workouts (2,000+ exercises), meal plans, AI food scanner, '
+            'and nutrition tracking. Operator billing on Jazz and Zong. Android support.',
       ),
       TopProject(
         name: 'Ersaal',
@@ -250,10 +250,6 @@ const List<FeaturedProject> kFeaturedProjects = [
     desc:
         'Personalized workout and meal plans, 2,000+ exercises, AI food scanner, and progress tracking. '
         'Operator VAS on Zong and Jazz.',
-    stats: [
-      ProjectStat('500K+', 'Downloads'),
-      ProjectStat('4.0', 'Rating'),
-    ],
     links: [
       ProjectLink(
         'Play Store',
