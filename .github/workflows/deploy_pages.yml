@@ -29,6 +29,9 @@ jobs:
       - run: flutter pub get
       - run: flutter build web --release --base-href /
 
+      # Use custom Android-themed favicon only (not default Flutter PNG icons).
+      - run: rm -rf build/web/icons
+
       - uses: actions/upload-pages-artifact@v3
         with:
           path: build/web

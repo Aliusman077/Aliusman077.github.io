@@ -1,111 +1,134 @@
 // Content for Ali Usman's portfolio (Flutter web).
-// Update kPortfolioLinkedInUrl if your public profile slug differs.
+// Profile: https://www.linkedin.com/in/ali-usman-a44548219
 
 const String kPortfolioEmail = 'aliusmankhan077@gmail.com';
 const String kPortfolioPhoneDisplay = '+92 308 9750550';
 const String kPortfolioPhoneTel = '+923089750550';
 const String kPortfolioGithubUser = 'Aliusman077';
 const String kPortfolioLinkedInUrl =
-    'https://www.linkedin.com/in/aliusmankhan077';
+    'https://www.linkedin.com/in/ali-usman-a44548219';
+const String kPortfolioLinkedInDisplay = 'linkedin.com/in/ali-usman-a44548219';
 const String kPortfolioLocation = 'Islamabad, Pakistan';
 
 const String kHeroName = 'Ali Usman';
-/// Hero / nav split (reference: first part light, accent part teal).
 const String kHeroNameFirst = 'Ali ';
 const String kHeroNameAccent = 'Usman';
 const String kBrandFirst = 'Ali ';
 const String kBrandAccent = 'Usman.';
-const String kHeroRole = 'Android Engineer';
+const String kHeroRole =
+    'Android Developer | Jetpack Compose · Kotlin · MVVM · Clean Architecture';
 const String kHeroTagline =
-    'Designing and shipping high-performance Android applications with Kotlin, Jetpack Compose, '
-    'MVVM, and Clean Architecture—focused on quality, performance, and maintainable code.';
+    'Building modern, scalable, and performance-optimized Android apps with clean code, '
+    'modular architecture, and responsive Jetpack Compose UIs.';
 const String kHeroStatsLine =
-    '4+ years · 25+ apps delivered · Kotlin, Jetpack Compose & Clean Architecture';
+    '4+ years · 25+ apps delivered · Compose · MVVM · Clean Architecture';
 
-/// Opening narrative (aligned with your professional summary).
+/// Shown under the hero name — signals availability to recruiters.
+const String kAvailabilityLabel = 'Open to Android roles · Full-time · Remote · Islamabad';
+
+/// Quick-scan tech stack for recruiters (hero chip row).
+const List<String> kCoreTechnologies = [
+  'Kotlin',
+  'Jetpack Compose',
+  'MVVM',
+  'Clean Architecture',
+  'Coroutines',
+  'Firebase',
+  'Room',
+  'Retrofit',
+  'Hilt / Koin',
+  'Play Store',
+];
+
 const String kAboutIntro =
-    'Android Engineer with 4+ years of experience designing, developing, and deploying '
-    'high-performance mobile applications. I bridge polished user experiences with scalable '
-    'codebases using the Android SDK, Jetpack, and modern architecture patterns. I have owned '
-    'end-to-end lifecycles from requirement analysis through Play Store release, and I have '
-    'delivered 25+ apps across utility, productivity, AI, and consumer domains—including '
-    'photo editing, remote control, and media products for large user bases.';
+    'I am a motivated Android developer with 4+ years of experience shipping modern, scalable, '
+    'and performance-optimized mobile applications. I specialize in Jetpack Compose, Kotlin, and '
+    'MVVM with Clean Architecture—focused on clean structure, modularity, and maintainability. '
+    'My stack includes Coroutines, StateFlow, LiveData, Navigation Component, Room, and Retrofit, '
+    'with dependency injection via Koin or Hilt and monitoring through Firebase Crashlytics. '
+    'I care about launch time, stability, lifecycle-aware code, and collaborating in Agile teams.';
 
-/// Tight bullets mirroring your résumé highlights (shown under the intro).
 const List<String> kProfessionalSummaryBullets = [
-  'Led and contributed to consumer and B2B apps: remote control, video player, and photo-editing products.',
-  'Integrations: REST APIs, Firebase (Auth, Firestore, Crashlytics), WebSockets, and ML Kit.',
-  'State and async: Coroutines, Flows, LiveData, StateFlow; DI with Koin and Hilt.',
-  'Offline-first persistence with Room and Realm; performance work via profiling, refactoring, and best practices.',
-  'Maps, media, and AR: Google Maps, Mapbox, ARCore, CameraX, and Jetpack libraries.',
-  'Collaboration with UI/UX and backend teams; sprint planning, code reviews, Agile delivery, and mentoring.',
-  'Passionate about code quality, continuous learning, and Android solutions aligned with business goals.',
+  'Android support for Switch flagship products—FitFlex (fitness VAS on Zong/Jazz) and Ersaal (smart SMS on Jazz).',
+  'Jetpack Compose UIs with MVVM, Clean Architecture, SOLID, and modularization for testable codebases.',
+  'Async and state: Coroutines, Flows, StateFlow, and LiveData; offline-first with Room and Realm.',
+  'Networking and backend: Retrofit, Ktor, REST APIs, WebSockets, and Firebase (Auth, Firestore, Crashlytics).',
+  '25+ apps across utility, productivity, AI, media, remote control, and photo editing—including Play Store releases.',
+  'Maps, media, and AR: Google Maps, Mapbox, ARCore, CameraX, ExoPlayer, ML Kit, and TensorFlow Lite.',
+  'Performance and security: profiling, ProGuard/R8, certificate pinning, and crash-free session improvements.',
+  'Cross-functional delivery with UI/UX and backend teams—code reviews, Git, Agile/Scrum, and mentoring.',
 ];
 
 const List<AboutHighlight> kAboutHighlights = [
   AboutHighlight(
-    title: 'Architecture you can evolve',
+    title: 'Compose & architecture',
     body:
-        'MVVM, Clean Architecture, SOLID, and OOP—readable, testable codebases that scale with the team '
-        'and product.',
+        'Jetpack Compose, MVVM, Clean Architecture, MVI patterns, and modularization for scalable Android products.',
   ),
   AboutHighlight(
     title: '25+ shipped applications',
     body:
-        'Utility, productivity, AI, and consumer apps on Play Store—including media, remote control, '
-        'and creative tools.',
+        'Consumer and B2B apps on Play Store—utility, productivity, AI, media, remote control, and creative tools.',
   ),
   AboutHighlight(
-    title: 'Integrations & platform depth',
+    title: 'Performance & quality',
     body:
-        'Retrofit, Ktor, OkHttp, Firebase, ML Kit, In-App Billing, AdMob, ExoPlayer, Glide, Coil, and more.',
+        'Lifecycle-aware code, memory management, faster launches, fewer ANRs/crashes, and Crashlytics-driven monitoring.',
   ),
   AboutHighlight(
-    title: 'Performance & stability',
+    title: 'Integrations',
     body:
-        'Reduced crashes and improved load times through profiling, ProGuard/R8, and disciplined refactors.',
+        'Retrofit, Firebase, ML Kit, billing, AdMob, ExoPlayer, Glide, Coil, and operator or third-party APIs.',
   ),
   AboutHighlight(
     title: 'Maps, AR & camera',
     body:
-        'Location and navigation with Google Maps and Mapbox; ARCore, CameraX, and media-heavy pipelines.',
+        'Google Maps, Mapbox, ARCore, and CameraX for location, navigation, and media-heavy experiences.',
   ),
   AboutHighlight(
-    title: 'Team delivery',
+    title: 'Team collaboration',
     body:
-        'Works with designers and backend engineers; mentors juniors and ships reliably in Agile environments.',
+        'Works with product, design, and backend teams using Git, Agile/Scrum, code reviews, and clear communication.',
   ),
 ];
 
 const List<JobEntry> kJobs = [
   JobEntry(
-    title: 'Android Developer',
+    title: 'Mobile Application Developer',
     company: 'Switch Communications',
     meta: 'January 2026 – Present · Islamabad, Pakistan',
     summary:
-        'Android applications for consumer and B2B products using Kotlin, Jetpack Compose, and Clean Architecture.',
+        'Android apps for telecom and digital products at Pakistan’s leading value-added services provider—Kotlin, '
+        'Jetpack Compose, and Clean Architecture.',
     bullets: [
-      'Develop and maintain Android applications; integrate REST APIs, Firebase, and operator billing/APIs.',
-      'Collaborate with product, design, and backend teams to deliver scalable, high-quality mobile experiences.',
-      'Own features end-to-end from planning to Play Store release; ensure performance, stability, and store compliance.',
-      'Participate in code reviews, sprint planning, and Agile delivery; mentor junior developers and promote best practices.',
+      'Develop and support Android apps including FitFlex and Ersaal—telecom VAS with operator billing and subscriptions.',
+      'Develop and maintain Android applications for consumer and B2B mobile products.',
+      'Integrate REST APIs, Firebase, and operator billing/APIs with scalable, maintainable architecture.',
+      'Collaborate with product, design, and backend teams from planning through Play Store release.',
+      'Focus on performance, stability, store compliance, code reviews, and Agile delivery.',
     ],
     topProjects: [
       TopProject(
-        name: 'Universal TV Remote Control App',
+        name: 'FitFlex',
         detail:
-            'Android app to control TV and set-top devices; strong engagement on Play Store. Kotlin, Jetpack Compose, IR/Bluetooth.',
+            'Switch Communications fitness VAS—500K+ downloads, 4.0 rating. Personalized workouts (2,000+ exercises), '
+            'meal plans, AI food scanner, and nutrition tracking. Operator billing on Jazz and Zong. Android support.',
       ),
       TopProject(
-        name: 'Video Player App',
+        name: 'Ersaal',
         detail:
-            'Full-featured player: multiple formats, playback controls, playlists, casting. ExoPlayer, Jetpack Compose.',
+            'Smart default SMS app by Switch—folder management, schedule send, SMS broadcast, web messaging, '
+            'pinned chats, and end-to-end encryption. Jazz VAS subscriptions; high install base. Android support.',
+      ),
+      TopProject(
+        name: 'Universal TV Remote Control App',
+        detail:
+            'Control TVs and set-top devices; high engagement on Play Store. Kotlin, Jetpack Compose, IR/Bluetooth.',
       ),
       TopProject(
         name: 'Photo Editor App',
         detail:
-            'Filters, custom backgrounds, text overlay and fonts, stickers, frames, crop and resize, draw and brush, '
-            'layers, multi-format export—optimized for mid-range devices. Kotlin, Jetpack Compose.',
+            'Filters, backgrounds, text and fonts, stickers, frames, crop/resize, draw tools, layers, and export—optimized for mid-range devices.',
       ),
     ],
     tags: [
@@ -118,63 +141,61 @@ const List<JobEntry> kJobs = [
     ],
   ),
   JobEntry(
-    title: 'Android Developer',
+    title: 'Android Engineer',
     company: 'Ninesol Technologies',
-    meta: 'August 2023 – December 2025 · Islamabad, Pakistan',
+    meta: 'October 2023 – January 2026 · Islamabad, Pakistan',
     summary:
-        'Designed, developed, and maintained modern Android applications with Kotlin, Jetpack Compose, and the Android SDK.',
+        'Designed and delivered modern Android applications with Kotlin, Jetpack Compose, and the Android SDK.',
     bullets: [
-      'Implemented Room, Navigation Component, Flows, and LiveData for efficient, maintainable architecture.',
-      'Collaborated with UI/UX designers and backend teams to deliver responsive, high-quality experiences.',
-      'Optimized performance, scalability, and reliability—reducing crashes and improving load times.',
-      'Integrated REST APIs, Firebase, and third-party libraries; applied Clean Architecture and MVVM.',
-      'Stayed current with platform updates and applied modern practices across existing products.',
+      'Built apps with Room, Navigation Component, Flows, and LiveData for maintainable architecture.',
+      'Collaborated with UI/UX and backend teams on responsive, high-quality mobile experiences.',
+      'Improved performance and reliability—reduced crashes and optimized load times.',
+      'Integrated REST APIs, Firebase, and third-party SDKs; applied Clean Architecture and MVVM.',
     ],
     topProjects: [
       TopProject(
         name: 'SOAPSUDS',
         detail:
-            'AI-powered medical communication between doctors and patients—notes, messages, and remote consultations. Kotlin, Clean Architecture.',
+            'AI-powered medical communication between doctors and patients—notes, messages, and remote consultations.',
       ),
       TopProject(
         name: 'NoteIQ',
         detail:
-            'AI-driven meeting assistant: records discussions and auto-generates structured notes, summaries, and reports.',
+            'AI meeting assistant that records discussions and generates structured notes, summaries, and reports.',
       ),
       TopProject(
         name: 'SkinCare AI',
-        detail:
-            'Personalized AI skincare recommendations from user input and skin type; ML Kit integration.',
+        detail: 'Personalized skincare recommendations with ML Kit integration.',
       ),
       TopProject(
         name: 'Chatly',
         detail:
-            'Advanced AI conversational and research assistant—intelligent search, content generation, and multi-model reasoning.',
+            'AI conversational and research assistant with intelligent search and multi-model reasoning.',
       ),
       TopProject(
         name: 'Wifi AR',
         detail:
-            'ARCore app visualizing real-time Wi‑Fi networks with signal strength and metadata in the environment. MVVM, Koin.',
+            'ARCore visualization of Wi‑Fi signal strength and metadata in the physical environment. MVVM, Koin.',
       ),
       TopProject(
         name: 'AI-Powered Image Editing App',
         detail:
-            'ML Kit background removal, CameraX, customizable templates; MVVM, Hilt, ViewModel, LiveData.',
+            'ML Kit background removal, CameraX, templates; MVVM, Hilt, ViewModel, LiveData.',
       ),
       TopProject(
         name: 'PDF Reader',
         detail:
-            'Creation, editing, merging, compressing, signing, lock/unlock, annotations, image-to-PDF; MVVM, Koin, large documents.',
+            'Create, edit, merge, compress, sign, annotate, and image-to-PDF; optimized for large documents.',
       ),
       TopProject(
         name: 'Quran Learning',
         detail:
-            'Quran and Hadith, Tarteel practice and recording, Namaz reminders; real-time socket-based Tarteel feedback. Clean Architecture, Hilt.',
+            'Quran and Hadith, Tarteel practice, Namaz reminders, and real-time socket-based Tarteel feedback.',
       ),
       TopProject(
         name: 'Multilingual Keyboard App',
         detail:
-            'Custom Android keyboard—multiple languages, predictive text, emoji; language layouts and themes. MVVM, Koin, IMF.',
+            'Custom IME with multiple languages, predictive text, emoji, and customizable themes.',
       ),
     ],
     tags: [
@@ -190,25 +211,23 @@ const List<JobEntry> kJobs = [
   JobEntry(
     title: 'Android Developer',
     company: 'FHA Technologies',
-    meta: 'July 2021 – August 2023 · Islamabad, Pakistan',
+    meta: 'July 2021 – September 2023 · Pakistan',
     summary:
-        'Built multiple Android applications from scratch in Java and Kotlin with clean, maintainable structure.',
+        'Built Android applications from scratch in Java and Kotlin with MVVM and maintainable modular structure.',
     bullets: [
-      'Implemented MVVM, View Binding, and Navigation Component for scalable, modular applications.',
-      'Integrated RESTful APIs with Retrofit and Ktor; Firebase, Realm, and Room for persistence and real-time sync.',
-      'Delivered location-based features with Google Maps API; optimized performance with Glide and Coroutines.',
-      'Worked in Agile teams on sprint planning, feature design, and code reviews; Play Store standards and Git-based workflows.',
+      'Implemented MVVM, View Binding, and Navigation Component for scalable apps.',
+      'Integrated Retrofit and Ktor APIs; Firebase, Realm, and Room for persistence and sync.',
+      'Delivered Google Maps–based features; optimized performance with Glide and Coroutines.',
+      'Contributed in Agile teams—sprint planning, code reviews, and Play Store releases.',
     ],
     topProjects: [
       TopProject(
         name: 'Location and map applications',
-        detail:
-            'Google Maps API and Mapbox—navigation and tracking solutions for B2B clients.',
+        detail: 'Google Maps and Mapbox navigation and tracking for B2B clients.',
       ),
       TopProject(
         name: 'Utility and productivity apps',
-        detail:
-            'Multiple Android apps (Java/Kotlin) from scratch for B2B and B2C, published on the Play Store.',
+        detail: 'Multiple Java/Kotlin apps from scratch for B2B and B2C, published on Play Store.',
       ),
     ],
     tags: [
@@ -222,85 +241,137 @@ const List<JobEntry> kJobs = [
   ),
 ];
 
+// Add Play Store / website URLs in [links] when ready — empty url hides that button.
 const List<FeaturedProject> kFeaturedProjects = [
+  FeaturedProject(
+    badge: 'Featured · Fitness',
+    name: 'FitFlex',
+    subtitle: 'Health & fitness · Switch Communications',
+    desc:
+        'Personalized workout and meal plans, 2,000+ exercises, AI food scanner, and progress tracking. '
+        'Operator VAS on Zong and Jazz.',
+    stats: [
+      ProjectStat('500K+', 'Downloads'),
+      ProjectStat('4.0', 'Rating'),
+    ],
+    links: [
+      ProjectLink(
+        'Play Store',
+        'https://play.google.com/store/apps/details?id=fitflex.workout.fitness.weight.gym.fat.training',
+      ),
+      ProjectLink('Website', 'https://switch.com.pk/services/digital-products/fitflex'),
+    ],
+    tags: ['Kotlin', 'Compose', 'Operator Billing', 'Fitness', 'Firebase'],
+  ),
+  FeaturedProject(
+    badge: 'Featured · Telecom',
+    name: 'Ersaal',
+    subtitle: 'Smart SMS · Switch / Jazz',
+    desc:
+        'Default SMS replacement with folders, schedule send, broadcast, web messaging, pinned chats, and E2E encryption.',
+    stats: [
+      ProjectStat('400K+', 'Installs'),
+    ],
+    links: [
+      ProjectLink('Website', 'https://ersaal.pk/'),
+      ProjectLink('Jazz VAS', 'https://jazz.com.pk/prepaid/ersaal'),
+    ],
+    tags: ['Kotlin', 'MVVM', 'WebSockets', 'Room', 'Operator Billing'],
+  ),
   FeaturedProject(
     badge: 'Consumer',
     name: 'Universal TV Remote Control',
-    desc:
-        'Control TVs and set-top devices with high engagement on Play Store; IR/Bluetooth, Kotlin, Jetpack Compose.',
+    subtitle: 'IR & Bluetooth remote',
+    desc: 'Control TVs and set-top devices with strong Play Store engagement; Kotlin, Jetpack Compose.',
+    links: [
+      ProjectLink('Play Store', ''), // TODO: paste Play Store URL
+    ],
     tags: ['Kotlin', 'Compose', 'Bluetooth', 'IR', 'Play Store'],
-  ),
-  FeaturedProject(
-    badge: 'Media',
-    name: 'Video Player App',
-    desc: 'Multi-format playback, playlists, casting, and polished controls with ExoPlayer.',
-    tags: ['ExoPlayer', 'Compose', 'Kotlin'],
   ),
   FeaturedProject(
     badge: 'Creative',
     name: 'Photo Editor App',
-    desc:
-        'Filters, backgrounds, typography, stickers, frames, layers, drawing tools, and fast export for real devices.',
+    subtitle: 'Photo editing suite',
+    desc: 'Filters, backgrounds, typography, stickers, frames, layers, drawing tools, and fast export.',
+    links: [
+      ProjectLink('Play Store', ''),
+    ],
     tags: ['Compose', 'Performance', 'CameraX'],
   ),
   FeaturedProject(
     badge: 'Health / AI',
     name: 'SOAPSUDS',
-    desc:
-        'AI-assisted medical communication—doctor–patient notes, messaging, and remote consultations.',
+    subtitle: 'Medical communication',
+    desc: 'AI-assisted doctor–patient notes, messaging, and remote consultations.',
+    links: [ProjectLink('Play Store', '')],
     tags: ['Clean Architecture', 'Kotlin', 'AI'],
   ),
   FeaturedProject(
     badge: 'Productivity / AI',
     name: 'NoteIQ',
+    subtitle: 'AI meeting assistant',
     desc: 'Meeting capture with AI-generated structured notes, summaries, and reports.',
+    links: [ProjectLink('Play Store', '')],
     tags: ['AI', 'Audio', 'Kotlin'],
   ),
   FeaturedProject(
     badge: 'Health / AI',
     name: 'SkinCare AI',
+    subtitle: 'Personalized skincare',
     desc: 'Personalized skincare guidance with ML Kit-driven analysis.',
+    links: [ProjectLink('Play Store', '')],
     tags: ['ML Kit', 'Kotlin', 'AI'],
   ),
   FeaturedProject(
     badge: 'AI',
     name: 'Chatly',
-    desc: 'Research and conversational assistant—search, generation, and deep reasoning across models.',
+    subtitle: 'AI assistant',
+    desc: 'Conversational and research assistant—search, generation, and deep reasoning.',
+    links: [ProjectLink('Play Store', '')],
     tags: ['AI', 'Kotlin', 'Networking'],
   ),
   FeaturedProject(
     badge: 'AI / Creative',
     name: 'AI-Powered Image Editing',
+    subtitle: 'ML image tools',
     desc: 'ML Kit workflows, CameraX, and templates with MVVM and Hilt.',
+    links: [ProjectLink('Play Store', '')],
     tags: ['ML Kit', 'Hilt', 'CameraX'],
   ),
   FeaturedProject(
     badge: 'AR',
     name: 'Wifi AR',
-    desc: 'ARCore overlay of Wi‑Fi strength and metadata in the physical environment.',
+    subtitle: 'Wi‑Fi visualization',
+    desc: 'ARCore overlay of Wi‑Fi strength and metadata in the real world.',
+    links: [ProjectLink('Play Store', '')],
     tags: ['ARCore', 'MVVM', 'Koin'],
   ),
   FeaturedProject(
     badge: 'Productivity',
     name: 'PDF Reader',
-    desc: 'Full PDF toolkit—edit, merge, compress, sign, annotate, and image-to-PDF at scale.',
+    subtitle: 'Document toolkit',
+    desc: 'Full PDF toolkit—edit, merge, compress, sign, annotate, and image-to-PDF.',
+    links: [ProjectLink('Play Store', '')],
     tags: ['MVVM', 'Koin', 'Documents'],
   ),
   FeaturedProject(
     badge: 'Education',
     name: 'Quran Learning',
+    subtitle: 'Quran & Hadith',
     desc: 'Quran and Hadith, Tarteel practice, Namaz reminders, and real-time socket feedback.',
+    links: [ProjectLink('Play Store', '')],
     tags: ['Hilt', 'Sockets', 'Clean Architecture'],
   ),
   FeaturedProject(
     badge: 'Productivity',
     name: 'Multilingual Keyboard',
+    subtitle: 'Custom IME',
     desc: 'Custom IME with languages, prediction, emoji, and themes.',
+    links: [ProjectLink('Play Store', '')],
     tags: ['IME', 'MVVM', 'Koin'],
   ),
 ];
 
-/// Grouped like a skills matrix (from your résumé technologies list).
 const List<SkillGroupData> kSkillGroups = [
   SkillGroupData(
     title: 'Languages & UI',
@@ -310,15 +381,13 @@ const List<SkillGroupData> kSkillGroups = [
       'XML',
       'Jetpack Compose',
       'Android SDK',
-      'NDK',
-      'JNI',
       'Material Design',
       'View Binding',
     ],
   ),
   SkillGroupData(
     title: 'Architecture & patterns',
-    tags: ['MVVM', 'MVC', 'MVP', 'Clean Architecture', 'OOP', 'SOLID'],
+    tags: ['MVVM', 'MVI', 'Clean Architecture', 'Modularization', 'SOLID', 'OOP'],
   ),
   SkillGroupData(
     title: 'Async & state',
@@ -330,7 +399,7 @@ const List<SkillGroupData> kSkillGroups = [
   ),
   SkillGroupData(
     title: 'Networking',
-    tags: ['Retrofit', 'Ktor', 'Volley', 'OkHttp', 'REST APIs', 'WebSockets'],
+    tags: ['Retrofit', 'Ktor', 'OkHttp', 'REST APIs', 'WebSockets'],
   ),
   SkillGroupData(
     title: 'Dependency injection',
@@ -340,6 +409,7 @@ const List<SkillGroupData> kSkillGroups = [
     title: 'Google, maps & Jetpack',
     tags: [
       'Firebase',
+      'Crashlytics',
       'Firestore',
       'Google Maps',
       'Mapbox',
@@ -351,7 +421,7 @@ const List<SkillGroupData> kSkillGroups = [
   ),
   SkillGroupData(
     title: 'Media, ML & AR',
-    tags: ['CameraX', 'ML Kit', 'ARCore', 'ExoPlayer', 'Glide', 'Coil'],
+    tags: ['CameraX', 'ML Kit', 'TensorFlow Lite', 'ARCore', 'ExoPlayer', 'Glide', 'Coil'],
   ),
   SkillGroupData(
     title: 'Quality, release & tools',
@@ -368,14 +438,11 @@ const List<SkillGroupData> kSkillGroups = [
       'ProGuard',
       'R8',
       'CI/CD',
-      'Postman',
       'Android Studio',
       'Figma',
-      'Debugging',
       'Performance optimization',
       'In-App Billing',
       'AdMob',
-      'Localization',
     ],
   ),
 ];
@@ -384,20 +451,25 @@ const List<MetricData> kMetrics = [
   MetricData(value: '4+', label: 'Years experience'),
   MetricData(value: '25+', label: 'Apps delivered'),
   MetricData(value: '3', label: 'Companies'),
-  MetricData(value: 'Play Store', label: 'Shipping focus'),
+  MetricData(value: 'Compose', label: 'Primary UI stack'),
 ];
 
-const String kEducationTitle = 'Bachelor of Science in Computer Sciences';
-const String kEducationMeta = '2021 · The University of Poonch Rawalakot';
+const String kEducationTitle = 'Bachelor of Science in Computer Science';
+const String kEducationMeta = '2017 – 2021 · The University of Poonch · GPA 3.5';
 const String kEducationSummary =
-    'Formal computer science training supporting production Android engineering and continuous platform learning.';
+    'Computer science foundation with strong focus on software engineering and Android development practice.';
 
 const List<String> kWhyWorkWithMe = [
-  '4+ years shipping production Android apps end-to-end',
-  '25+ applications across utility, productivity, AI, and consumer domains',
-  'Deep stack: Compose, Clean Architecture, Firebase, ML Kit, maps, and media pipelines',
-  'Reliable collaborator in Agile teams—with code reviews, mentoring, and Play Store discipline',
+  '4+ years building production Android apps with Compose, MVVM, and Clean Architecture',
+  '25+ apps across utility, productivity, AI, and consumer domains',
+  'Strong collaborator—clear communication, code reviews, and Agile delivery',
+  'Open to Android developer roles—full-time, freelance, or remote',
 ];
+
+/// Short testimonial from LinkedIn (Abdul Samad Tayyab).
+const String kRecommendationQuote =
+    'Skilled and dedicated Android developer with strong problem-solving and clean code practices—'
+    'delivers high-quality work and collaborates effectively with the team.';
 
 class AboutHighlight {
   const AboutHighlight({required this.title, required this.body});
@@ -431,18 +503,40 @@ class JobEntry {
   final List<String> tags;
 }
 
+/// External link on a project card (reference-style). Leave [url] empty to hide until you add it.
+class ProjectLink {
+  const ProjectLink(this.label, this.url);
+  final String label;
+  final String url;
+  bool get hasUrl => url.trim().isNotEmpty;
+}
+
+class ProjectStat {
+  const ProjectStat(this.value, this.label);
+  final String value;
+  final String label;
+}
+
 class FeaturedProject {
   const FeaturedProject({
     required this.badge,
     required this.name,
     required this.desc,
     required this.tags,
+    this.subtitle = '',
+    this.stats = const [],
+    this.links = const [],
   });
 
   final String badge;
   final String name;
+  final String subtitle;
   final String desc;
   final List<String> tags;
+  final List<ProjectStat> stats;
+  final List<ProjectLink> links;
+
+  List<ProjectLink> get activeLinks => links.where((l) => l.hasUrl).toList();
 }
 
 class SkillGroupData {
@@ -456,3 +550,4 @@ class MetricData {
   final String value;
   final String label;
 }
+

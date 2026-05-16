@@ -27,6 +27,48 @@ class _PortfolioPageState extends State<PortfolioPage> {
   final GlobalKey _kEducation = GlobalKey();
   final GlobalKey _kConnect = GlobalKey();
 
+  int _activeNav = 0;
+  bool _showScrollFab = false;
+
+  List<GlobalKey> get _sectionKeys => [
+        _kHero,
+        _kAbout,
+        _kJourney,
+        _kProjects,
+        _kSkills,
+        _kEducation,
+        _kConnect,
+      ];
+
+  @override
+  void initState() {
+    super.initState();
+    _scroll.addListener(_onScroll);
+  }
+
+  void _onScroll() {
+    final showFab = _scroll.offset > 380;
+    if (showFab != _showScrollFab) setState(() => _showScrollFab = showFab);
+
+    if (!mounted) return;
+    final navH = 88.0;
+    var best = 0;
+    var bestDist = double.infinity;
+    for (var i = 0; i < _sectionKeys.length; i++) {
+      final ctx = _sectionKeys[i].currentContext;
+      if (ctx == null) continue;
+      final box = ctx.findRenderObject() as RenderBox?;
+      if (box == null || !box.hasSize) continue;
+      final dy = box.localToGlobal(Offset.zero).dy;
+      final dist = (dy - navH).abs();
+      if (dist < bestDist) {
+        bestDist = dist;
+        best = i;
+      }
+    }
+    if (best != _activeNav) setState(() => _activeNav = best);
+  }
+
   Future<void> _openUri(String url) async {
     final uri = Uri.parse(url);
     if (await canLaunchUrl(uri)) await launchUrl(uri, mode: LaunchMode.externalApplication);
@@ -34,11 +76,26 @@ class _PortfolioPageState extends State<PortfolioPage> {
 
   void _scrollTo(GlobalKey key) {
     final ctx = key.currentContext;
-    if (ctx != null) Scrollable.ensureVisible(ctx, duration: const Duration(milliseconds: 600), curve: Curves.easeOutCubic, alignment: 0.05);
+    if (ctx != null) {
+      Scrollable.ensureVisible(
+        ctx,
+        duration: const Duration(milliseconds: 600),
+        curve: Curves.easeOutCubic,
+        alignment: 0.05,
+      );
+    }
+  }
+
+  void _scrollToTop() {
+    _scroll.animateTo(0, duration: const Duration(milliseconds: 550), curve: Curves.easeOutCubic);
   }
 
   @override
-  void dispose() { _scroll.dispose(); super.dispose(); }
+  void dispose() {
+    _scroll.removeListener(_onScroll);
+    _scroll.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -48,11 +105,34 @@ class _PortfolioPageState extends State<PortfolioPage> {
     final navBg = isDark ? const Color(0xEE0A0E14) : Colors.white;
     final navBorder = isDark ? const Color(0x14FFFFFF) : const Color(0x14000000);
     return Scaffold(
-      body: LayoutBuilder(builder: (context, constraints) {
+      floatingActionButton: _showScrollFab
+          ? Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                FloatingActionButton.small(
+                  heroTag: 'contact_fab',
+                  tooltip: 'Contact',
+                  onPressed: () => _scrollTo(_kConnect),
+                  child: const Icon(Icons.mail_outline_rounded, size: 20),
+                ),
+                const SizedBox(height: 10),
+                FloatingActionButton.small(
+                  heroTag: 'top_fab',
+                  tooltip: 'Back to top',
+                  onPressed: _scrollToTop,
+                  child: const Icon(Icons.keyboard_arrow_up_rounded, size: 22),
+                ),
+              ],
+            )
+          : null,
+      body: SelectionArea(
+        child: SafeArea(
+        child: LayoutBuilder(builder: (context, constraints) {
         final wide = constraints.maxWidth >= 1000;
+        final padH = constraints.maxWidth < 400 ? 12.0 : 20.0;
         return Column(children: [
           PortfolioNavBar(
-            wide: wide, navBg: navBg, navBorder: navBorder,
+            wide: wide, navBg: navBg, navBorder: navBorder, activeNav: _activeNav,
             isDarkMode: widget.isDarkMode, onToggleTheme: widget.onToggleTheme,
             onHome: () => _scrollTo(_kHero), onAbout: () => _scrollTo(_kAbout),
             onExperience: () => _scrollTo(_kJourney), onProjects: () => _scrollTo(_kProjects),
@@ -74,13 +154,14 @@ class _PortfolioPageState extends State<PortfolioPage> {
             SliverToBoxAdapter(child: Center(child: ConstrainedBox(
               constraints: const BoxConstraints(maxWidth: 1100),
               child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 20),
+                padding: EdgeInsets.symmetric(horizontal: padH),
                 child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
                   HeroSection(key: _kHero, cs: cs, muted: muted,
                     onWork: () => _scrollTo(_kProjects), onContact: () => _scrollTo(_kConnect),
                     onLinkedIn: () => _openUri(kPortfolioLinkedInUrl),
-                    onGithub: () => _openUri('https://github.com/\$kPortfolioGithubUser'),
-                    onEmail: () => _openUri('mailto:\$kPortfolioEmail'),
+                    onGithub: () => _openUri('https://github.com/$kPortfolioGithubUser'),
+                    onEmail: () => _openUri('mailto:$kPortfolioEmail'),
+                    onPhone: () => _openUri('tel:$kPortfolioPhoneTel'),
                     onScrollDown: () => _scrollTo(_kAbout)),
                   const SectionGap(),
                   AboutSection(key: _kAbout),
@@ -94,15 +175,15 @@ class _PortfolioPageState extends State<PortfolioPage> {
                   EducationSection(key: _kEducation),
                   const SectionGap(),
                   ConnectSection(key: _kConnect, muted: muted,
-                    onGithub: () => _openUri('https://github.com/\$kPortfolioGithubUser'),
+                    onGithub: () => _openUri('https://github.com/$kPortfolioGithubUser'),
                     onLinkedIn: () => _openUri(kPortfolioLinkedInUrl),
-                    onEmail: () => _openUri('mailto:\$kPortfolioEmail'),
-                    onPhone: () => _openUri('tel:\$kPortfolioPhoneTel')),
+                    onEmail: () => _openUri('mailto:$kPortfolioEmail'),
+                    onPhone: () => _openUri('tel:$kPortfolioPhoneTel')),
                   const SizedBox(height: 48),
                   PortfolioFooter(
                     onLinkedIn: () => _openUri(kPortfolioLinkedInUrl),
-                    onGithub: () => _openUri('https://github.com/\$kPortfolioGithubUser'),
-                    onEmail: () => _openUri('mailto:\$kPortfolioEmail')),
+                    onGithub: () => _openUri('https://github.com/$kPortfolioGithubUser'),
+                    onEmail: () => _openUri('mailto:$kPortfolioEmail')),
                   const SizedBox(height: 32),
                 ]),
               ),
@@ -110,6 +191,8 @@ class _PortfolioPageState extends State<PortfolioPage> {
           ])),
         ]);
       }),
+        ),
+      ),
     );
   }
 }
@@ -153,11 +236,12 @@ class _HoverLiftState extends State<HoverLift> {
 
 class PortfolioNavBar extends StatelessWidget {
   const PortfolioNavBar({super.key, required this.wide, required this.navBg, required this.navBorder,
-    required this.isDarkMode, required this.onToggleTheme, required this.onHome, required this.onAbout,
-    required this.onExperience, required this.onProjects, required this.onSkills,
+    required this.activeNav, required this.isDarkMode, required this.onToggleTheme, required this.onHome,
+    required this.onAbout, required this.onExperience, required this.onProjects, required this.onSkills,
     required this.onEducation, required this.onContact, required this.onGetInTouch});
   final bool wide;
   final Color navBg, navBorder;
+  final int activeNav;
   final bool isDarkMode;
   final VoidCallback onToggleTheme, onHome, onAbout, onExperience, onProjects, onSkills, onEducation, onContact, onGetInTouch;
 
@@ -185,10 +269,13 @@ class PortfolioNavBar extends StatelessWidget {
               ])),
             )))),
             Expanded(flex: 2, child: Center(child: SingleChildScrollView(scrollDirection: Axis.horizontal, child: Row(mainAxisSize: MainAxisSize.min, children: [
-              TopNavLink('Home', onHome, navMuted), TopNavLink('About', onAbout, navMuted),
-              TopNavLink('Experience', onExperience, navMuted), TopNavLink('Projects', onProjects, navMuted),
-              TopNavLink('Skills', onSkills, navMuted), TopNavLink('Education', onEducation, navMuted),
-              TopNavLink('Contact', onContact, navMuted),
+              TopNavLink('Home', onHome, navMuted, active: activeNav == 0),
+              TopNavLink('About', onAbout, navMuted, active: activeNav == 1),
+              TopNavLink('Experience', onExperience, navMuted, active: activeNav == 2),
+              TopNavLink('Projects', onProjects, navMuted, active: activeNav == 3),
+              TopNavLink('Skills', onSkills, navMuted, active: activeNav == 4),
+              TopNavLink('Education', onEducation, navMuted, active: activeNav == 5),
+              TopNavLink('Contact', onContact, navMuted, active: activeNav == 6),
             ])))),
             Expanded(flex: 1, child: Align(alignment: Alignment.centerRight, child: Row(mainAxisSize: MainAxisSize.min, children: [
               IconButton(tooltip: isDarkMode ? 'Light mode' : 'Dark mode', onPressed: onToggleTheme,
@@ -220,10 +307,11 @@ class PortfolioNavBar extends StatelessWidget {
 }
 
 class TopNavLink extends StatefulWidget {
-  const TopNavLink(this.label, this.onTap, this.color);
+  const TopNavLink(this.label, this.onTap, this.color, {this.active = false});
   final String label;
   final VoidCallback onTap;
   final Color color;
+  final bool active;
   @override
   State<TopNavLink> createState() => _TopNavLinkState();
 }
@@ -237,10 +325,22 @@ class _TopNavLinkState extends State<TopNavLink> {
       onExit: (_) => setState(() => hover = false),
       child: TextButton(
         onPressed: widget.onTap,
-        style: TextButton.styleFrom(foregroundColor: hover ? cs.primary : widget.color, padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10), minimumSize: Size.zero, tapTargetSize: MaterialTapTargetSize.shrinkWrap),
+        style: TextButton.styleFrom(
+          foregroundColor: widget.active || hover ? cs.primary : widget.color,
+          backgroundColor: widget.active ? cs.primary.withValues(alpha: 0.1) : Colors.transparent,
+          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+          minimumSize: Size.zero,
+          tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+        ),
         child: AnimatedDefaultTextStyle(
           duration: const Duration(milliseconds: 150),
-          style: TextStyle(fontWeight: hover ? FontWeight.w700 : FontWeight.w500, fontSize: 15, height: 1.2, color: hover ? cs.primary : widget.color),
+          style: TextStyle(
+            fontWeight: widget.active || hover ? FontWeight.w700 : FontWeight.w500,
+            fontSize: 15,
+            height: 1.2,
+            color: widget.active || hover ? cs.primary : widget.color,
+          ),
           child: Text(widget.label),
         ),
       ),
@@ -259,10 +359,10 @@ class ChipNav extends StatelessWidget {
 class HeroSection extends StatefulWidget {
   const HeroSection({super.key, required this.cs, required this.muted, required this.onWork,
     required this.onContact, required this.onLinkedIn, required this.onGithub,
-    required this.onEmail, required this.onScrollDown});
+    required this.onEmail, required this.onPhone, required this.onScrollDown});
   final ColorScheme cs;
   final Color muted;
-  final VoidCallback onWork, onContact, onLinkedIn, onGithub, onEmail, onScrollDown;
+  final VoidCallback onWork, onContact, onLinkedIn, onGithub, onEmail, onPhone, onScrollDown;
   @override
   State<HeroSection> createState() => _HeroSectionState();
 }
@@ -360,8 +460,9 @@ class _HeroSectionState extends State<HeroSection> with TickerProviderStateMixin
                 padding: const EdgeInsets.all(3),
                 child: Container(
                   decoration: BoxDecoration(shape: BoxShape.circle, color: isDark ? const Color(0xFF0A0E14) : Colors.white),
-                  child: Center(child: Text(kHeroNameFirst.trim().substring(0, 1) + kHeroNameAccent.substring(0, 1),
-                    style: TextStyle(fontSize: 36, fontWeight: FontWeight.w800, color: cs.primary, letterSpacing: -1))),
+                  child: Center(
+                    child: Icon(Icons.phone_android_rounded, size: 48, color: cs.primary),
+                  ),
                 ),
               );
             }).animate().fadeIn(duration: 600.ms, curve: Curves.easeOutCubic).scale(begin: const Offset(0.7, 0.7), curve: Curves.easeOutBack),
@@ -370,6 +471,8 @@ class _HeroSectionState extends State<HeroSection> with TickerProviderStateMixin
               TextSpan(text: kHeroNameFirst, style: headlineStyle.copyWith(color: cs.onSurface)),
               TextSpan(text: kHeroNameAccent, style: headlineStyle.copyWith(color: cs.primary)),
             ]), textAlign: TextAlign.center).animate().fadeIn(delay: 150.ms, duration: 550.ms, curve: Curves.easeOutCubic).slideY(begin: 0.06, end: 0, curve: Curves.easeOutCubic),
+            SizedBox(height: w >= 900 ? 14 : 10),
+            const OpenToWorkBadge().animate().fadeIn(delay: 200.ms, duration: 450.ms).scale(begin: const Offset(0.92, 0.92), curve: Curves.easeOutBack),
             SizedBox(height: w >= 900 ? 14 : 10),
             SizedBox(height: 32, child: Row(mainAxisAlignment: MainAxisAlignment.center, children: [
               Text(displayedRole, style: TextStyle(fontSize: w >= 900 ? 20 : 17, color: cs.primary, fontWeight: FontWeight.w600, height: 1.4)),
@@ -381,8 +484,17 @@ class _HeroSectionState extends State<HeroSection> with TickerProviderStateMixin
             Padding(padding: const EdgeInsets.symmetric(horizontal: 8), child: Text(kHeroTagline, textAlign: TextAlign.center, style: TextStyle(fontSize: w >= 900 ? 17 : 15, color: muted, height: 1.6, fontWeight: FontWeight.w400)))
                 .animate().fadeIn(delay: 350.ms, duration: 550.ms).slideY(begin: 0.1, end: 0, curve: Curves.easeOutCubic),
             SizedBox(height: w >= 900 ? 20 : 14),
-            HeroStats(cs: cs).animate().fadeIn(delay: 420.ms, duration: 500.ms).slideY(begin: 0.08, end: 0, curve: Curves.easeOutCubic),
-            SizedBox(height: w >= 900 ? 32 : 24),
+            HeroStats(cs: cs, compact: w < 500).animate().fadeIn(delay: 420.ms, duration: 500.ms).slideY(begin: 0.08, end: 0, curve: Curves.easeOutCubic),
+            SizedBox(height: w >= 900 ? 18 : 14),
+            CoreTechStrip(cs: cs).animate().fadeIn(delay: 460.ms, duration: 480.ms).slideY(begin: 0.06, end: 0, curve: Curves.easeOutCubic),
+            SizedBox(height: w >= 900 ? 24 : 18),
+            RecruiterQuickActions(
+              onEmail: widget.onEmail,
+              onLinkedIn: widget.onLinkedIn,
+              onGithub: widget.onGithub,
+              onPhone: widget.onPhone,
+            ).animate().fadeIn(delay: 500.ms, duration: 450.ms),
+            SizedBox(height: w >= 900 ? 28 : 22),
             Wrap(alignment: WrapAlignment.center, spacing: 14, runSpacing: 14, children: [
               FilledButton.icon(onPressed: widget.onWork, icon: const Icon(Icons.work_outline_rounded, size: 18), label: const Text('View My Work'),
                 style: FilledButton.styleFrom(padding: EdgeInsets.symmetric(horizontal: w >= 900 ? 28 : 22, vertical: w >= 900 ? 15 : 13), textStyle: TextStyle(fontSize: w >= 900 ? 15 : 14, fontWeight: FontWeight.w600), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)))),
@@ -421,24 +533,192 @@ class _BlinkingCursorState extends State<BlinkingCursor> with SingleTickerProvid
 }
 
 class HeroStats extends StatelessWidget {
-  const HeroStats({super.key, required this.cs});
+  const HeroStats({super.key, required this.cs, this.compact = false});
   final ColorScheme cs;
+  final bool compact;
+
   @override
   Widget build(BuildContext context) {
-    final stats = [('4+', 'Years'), ('25+', 'Apps'), ('3', 'Companies')];
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
-      decoration: BoxDecoration(borderRadius: BorderRadius.circular(14), color: kAccent.withValues(alpha: 0.08), border: Border.all(color: kAccent.withValues(alpha: 0.2))),
-      child: Row(mainAxisSize: MainAxisSize.min, children: stats.asMap().entries.map((e) {
-        final isLast = e.key == stats.length - 1;
-        return Row(children: [
-          Column(children: [
-            Text(e.value.$1, style: TextStyle(fontSize: 22, fontWeight: FontWeight.w800, color: cs.primary)),
-            Text(e.value.$2, style: const TextStyle(fontSize: 12, color: kMutedColor)),
+    final stats = [
+      ('4+', 'Years'),
+      ('25+', 'Apps'),
+      ('500K+', 'FitFlex DLs'),
+      ('3', 'Companies'),
+    ];
+    final statTile = (String v, String l) => Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+          child: Column(mainAxisSize: MainAxisSize.min, children: [
+            Text(v, style: TextStyle(fontSize: compact ? 18 : 22, fontWeight: FontWeight.w800, color: cs.primary)),
+            Text(l, textAlign: TextAlign.center, style: TextStyle(fontSize: compact ? 11 : 12, color: kMutedColor)),
           ]),
-          if (!isLast) Container(width: 1, height: 32, margin: const EdgeInsets.symmetric(horizontal: 20), color: kAccent.withValues(alpha: 0.3)),
-        ]);
-      }).toList()),
+        );
+
+    return Container(
+      width: compact ? double.infinity : null,
+      padding: EdgeInsets.symmetric(horizontal: compact ? 12 : 24, vertical: 14),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(14),
+        color: kAccent.withValues(alpha: 0.08),
+        border: Border.all(color: kAccent.withValues(alpha: 0.2)),
+      ),
+      child: compact
+          ? Wrap(alignment: WrapAlignment.center, spacing: 4, runSpacing: 4, children: stats.map((s) => statTile(s.$1, s.$2)).toList())
+          : Row(
+              mainAxisSize: MainAxisSize.min,
+              children: stats.asMap().entries.map((e) {
+                final isLast = e.key == stats.length - 1;
+                return Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    statTile(e.value.$1, e.value.$2),
+                    if (!isLast) Container(width: 1, height: 36, margin: const EdgeInsets.symmetric(horizontal: 8), color: kAccent.withValues(alpha: 0.3)),
+                  ],
+                );
+              }).toList(),
+            ),
+    );
+  }
+}
+
+/// Pulsing “open to work” badge for recruiters.
+class OpenToWorkBadge extends StatefulWidget {
+  const OpenToWorkBadge({super.key});
+  @override
+  State<OpenToWorkBadge> createState() => _OpenToWorkBadgeState();
+}
+
+class _OpenToWorkBadgeState extends State<OpenToWorkBadge> with SingleTickerProviderStateMixin {
+  late AnimationController _pulse;
+
+  @override
+  void initState() {
+    super.initState();
+    _pulse = AnimationController(vsync: this, duration: const Duration(milliseconds: 1400))..repeat(reverse: true);
+  }
+
+  @override
+  void dispose() {
+    _pulse.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    return Center(
+      child: AnimatedBuilder(
+        animation: _pulse,
+        builder: (context, _) {
+          final t = CurvedAnimation(parent: _pulse, curve: Curves.easeInOut).value;
+          return Container(
+            constraints: const BoxConstraints(maxWidth: 520),
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(24),
+              color: cs.primary.withValues(alpha: 0.1 + t * 0.06),
+              border: Border.all(color: cs.primary.withValues(alpha: 0.35 + t * 0.15)),
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Container(
+                  width: 8,
+                  height: 8,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: Color.lerp(const Color(0xFF22C55E), cs.primary, t * 0.3),
+                    boxShadow: [BoxShadow(color: cs.primary.withValues(alpha: 0.5 * t), blurRadius: 6)],
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Flexible(
+                  child: Text(
+                    kAvailabilityLabel,
+                    textAlign: TextAlign.center,
+                    style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: cs.primary),
+                  ),
+                ),
+              ],
+            ),
+          );
+        },
+      ),
+    );
+  }
+}
+
+/// Horizontal tech chips — quick scan for hiring managers.
+class CoreTechStrip extends StatelessWidget {
+  const CoreTechStrip({super.key, required this.cs});
+  final ColorScheme cs;
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      height: 36,
+      child: ListView.separated(
+        scrollDirection: Axis.horizontal,
+        shrinkWrap: true,
+        itemCount: kCoreTechnologies.length,
+        separatorBuilder: (_, __) => const SizedBox(width: 8),
+        itemBuilder: (context, i) {
+          return Container(
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(20),
+              color: cs.onSurface.withValues(alpha: 0.06),
+              border: Border.all(color: cs.primary.withValues(alpha: 0.22)),
+            ),
+            child: Text(
+              kCoreTechnologies[i],
+              style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: cs.onSurface.withValues(alpha: 0.88)),
+            ),
+          ).animate().fadeIn(delay: (40 * i).ms, duration: 350.ms).slideX(begin: 0.05, end: 0);
+        },
+      ),
+    );
+  }
+}
+
+/// One-tap recruiter actions above primary CTAs.
+class RecruiterQuickActions extends StatelessWidget {
+  const RecruiterQuickActions({
+    super.key,
+    required this.onEmail,
+    required this.onLinkedIn,
+    required this.onGithub,
+    required this.onPhone,
+  });
+  final VoidCallback onEmail, onLinkedIn, onGithub, onPhone;
+
+  @override
+  Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    final w = MediaQuery.sizeOf(context).width;
+    final actions = [
+      ('Email', Icons.mail_outline_rounded, onEmail),
+      ('LinkedIn', Icons.work_outline_rounded, onLinkedIn),
+      ('GitHub', Icons.code_rounded, onGithub),
+      if (w >= 400) ('Call', Icons.phone_outlined, onPhone),
+    ];
+    return Wrap(
+      alignment: WrapAlignment.center,
+      spacing: 8,
+      runSpacing: 8,
+      children: actions.map((a) {
+        return OutlinedButton.icon(
+          onPressed: a.$3,
+          icon: Icon(a.$2, size: 16),
+          label: Text(a.$1),
+          style: OutlinedButton.styleFrom(
+            foregroundColor: cs.onSurface.withValues(alpha: 0.9),
+            side: BorderSide(color: cs.primary.withValues(alpha: 0.35)),
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+            textStyle: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600),
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+          ),
+        );
+      }).toList(),
     );
   }
 }
@@ -533,19 +813,14 @@ class AboutSection extends StatelessWidget {
       const SizedBox(height: 24),
       LayoutBuilder(builder: (context, c) {
         final cols = c.maxWidth > 900 ? 3 : (c.maxWidth > 560 ? 2 : 1);
-        if (cols == 1) {
-          return Column(children: List.generate(kAboutHighlights.length, (i) => Padding(
-            padding: const EdgeInsets.only(bottom: 12),
-            child: SizedBox(height: 130, child: InfoCard(title: kAboutHighlights[i].title, body: kAboutHighlights[i].body, index: i)
+        final itemWidth = (c.maxWidth - (cols - 1) * 12) / cols;
+        return Wrap(
+          spacing: 12,
+          runSpacing: 12,
+          children: List.generate(kAboutHighlights.length, (i) =>
+            SizedBox(width: itemWidth, child: InfoCard(title: kAboutHighlights[i].title, body: kAboutHighlights[i].body, index: i)
                 .animate().fadeIn(delay: (100 + i * 70).ms, duration: 450.ms, curve: Curves.easeOutCubic).slideY(begin: 0.12, end: 0, curve: Curves.easeOutCubic)),
-          )));
-        }
-        return GridView.builder(
-          shrinkWrap: true, physics: const NeverScrollableScrollPhysics(),
-          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: cols, crossAxisSpacing: 12, mainAxisSpacing: 12, childAspectRatio: 1.15),
-          itemCount: kAboutHighlights.length,
-          itemBuilder: (context, i) => InfoCard(title: kAboutHighlights[i].title, body: kAboutHighlights[i].body, index: i)
-              .animate().fadeIn(delay: (100 + i * 70).ms, duration: 450.ms, curve: Curves.easeOutCubic).slideY(begin: 0.12, end: 0, curve: Curves.easeOutCubic),
+          ),
         );
       }),
     ]);
@@ -674,22 +949,35 @@ class ProjectsSection extends StatelessWidget {
         .animate().fadeIn(duration: 480.ms).slideY(begin: 0.08, end: 0, curve: Curves.easeOutCubic),
     LayoutBuilder(builder: (context, c) {
       final cols = c.maxWidth > 900 ? 3 : (c.maxWidth > 560 ? 2 : 1);
+      final aspect = cols == 3 ? 0.68 : (cols == 2 ? 0.72 : 1.0);
       if (cols == 1) {
         return Column(children: List.generate(kFeaturedProjects.length, (i) {
           final p = kFeaturedProjects[i];
-          return Padding(padding: const EdgeInsets.only(bottom: 14), child: SizedBox(height: 220,
-            child: ProjectCard(badge: p.badge, name: p.name, desc: p.desc, tags: p.tags, index: i)
-                .animate().fadeIn(delay: (80 + i * 55).ms, duration: 480.ms, curve: Curves.easeOutCubic).slideY(begin: 0.12, end: 0, curve: Curves.easeOutCubic)));
+          return Padding(
+            padding: const EdgeInsets.only(bottom: 14),
+            child: ProjectCard(project: p, index: i, featured: i < 2)
+                .animate()
+                .fadeIn(delay: (80 + i * 55).ms, duration: 480.ms, curve: Curves.easeOutCubic)
+                .slideY(begin: 0.12, end: 0, curve: Curves.easeOutCubic),
+          );
         }));
       }
       return GridView.builder(
-        shrinkWrap: true, physics: const NeverScrollableScrollPhysics(),
-        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: cols, crossAxisSpacing: 14, mainAxisSpacing: 14, childAspectRatio: 1.0),
+        shrinkWrap: true,
+        physics: const NeverScrollableScrollPhysics(),
+        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+          crossAxisCount: cols,
+          crossAxisSpacing: 14,
+          mainAxisSpacing: 14,
+          childAspectRatio: aspect,
+        ),
         itemCount: kFeaturedProjects.length,
         itemBuilder: (context, i) {
           final p = kFeaturedProjects[i];
-          return ProjectCard(badge: p.badge, name: p.name, desc: p.desc, tags: p.tags, index: i)
-              .animate().fadeIn(delay: (80 + i * 55).ms, duration: 480.ms, curve: Curves.easeOutCubic).slideY(begin: 0.12, end: 0, curve: Curves.easeOutCubic);
+          return ProjectCard(project: p, index: i, featured: i < 2)
+              .animate()
+              .fadeIn(delay: (80 + i * 55).ms, duration: 480.ms, curve: Curves.easeOutCubic)
+              .slideY(begin: 0.12, end: 0, curve: Curves.easeOutCubic);
         },
       );
     }),
@@ -697,13 +985,14 @@ class ProjectsSection extends StatelessWidget {
 }
 
 class ProjectCard extends StatefulWidget {
-  const ProjectCard({super.key, required this.badge, required this.name, required this.desc, required this.tags, required this.index});
-  final String badge, name, desc;
-  final List<String> tags;
+  const ProjectCard({super.key, required this.project, required this.index, this.featured = false});
+  final FeaturedProject project;
   final int index;
+  final bool featured;
   @override
   State<ProjectCard> createState() => _ProjectCardState();
 }
+
 class _ProjectCardState extends State<ProjectCard> {
   bool hover = false;
   static const gradients = [
@@ -711,31 +1000,187 @@ class _ProjectCardState extends State<ProjectCard> {
     [Color(0xFFEA580C), Color(0xFFEAB308)], [Color(0xFF2563EB), Color(0xFF7C3AED)],
     [Color(0xFF16A34A), Color(0xFF3DD6C6)], [Color(0xFFDB2777), Color(0xFF7C3AED)],
   ];
+
+  Future<void> _openLink(String url) async {
+    final uri = Uri.parse(url);
+    if (await canLaunchUrl(uri)) {
+      await launchUrl(uri, mode: LaunchMode.externalApplication);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
+    final p = widget.project;
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final grad = gradients[widget.index % gradients.length];
+    final links = p.activeLinks;
+
     return MouseRegion(
       onEnter: (_) => setState(() => hover = true),
       onExit: (_) => setState(() => hover = false),
-      child: AnimatedScale(scale: hover ? 1.013 : 1.0, duration: const Duration(milliseconds: 200), curve: Curves.easeOutCubic,
-        child: AnimatedContainer(duration: const Duration(milliseconds: 200),
-          decoration: BoxDecoration(borderRadius: BorderRadius.circular(14), boxShadow: hover ? [BoxShadow(color: grad[0].withValues(alpha: 0.2), blurRadius: 24)] : []),
-          child: Card(clipBehavior: Clip.antiAlias, child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-            Container(height: 6, decoration: BoxDecoration(gradient: LinearGradient(colors: grad))),
-            Expanded(child: Padding(padding: const EdgeInsets.all(18), child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-              Container(padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-                decoration: BoxDecoration(color: grad[0].withValues(alpha: isDark ? 0.2 : 0.12), borderRadius: BorderRadius.circular(5)),
-                child: Text(widget.badge.toUpperCase(), style: TextStyle(fontSize: 10, fontWeight: FontWeight.w700, letterSpacing: 1.2, color: grad[0]))),
-              const SizedBox(height: 10),
-              Text(widget.name, style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 16)),
-              const SizedBox(height: 8),
-              Text(widget.desc, style: const TextStyle(color: kMutedColor, height: 1.45, fontSize: 14), maxLines: 4, overflow: TextOverflow.ellipsis),
-              const SizedBox(height: 10),
-              Wrap(spacing: 6, runSpacing: 6, children: widget.tags.map((t) => SkillTag(t)).toList()),
-            ]))),
-          ])))),
+      child: AnimatedScale(
+        scale: hover ? 1.013 : 1.0,
+        duration: const Duration(milliseconds: 200),
+        curve: Curves.easeOutCubic,
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 200),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(14),
+            boxShadow: hover ? [BoxShadow(color: grad[0].withValues(alpha: 0.2), blurRadius: 24)] : [],
+          ),
+          child: Card(
+            clipBehavior: Clip.antiAlias,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Container(height: 6, decoration: BoxDecoration(gradient: LinearGradient(colors: grad))),
+                Expanded(
+                  child: Padding(
+                    padding: const EdgeInsets.all(18),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        if (widget.featured)
+                          Padding(
+                            padding: const EdgeInsets.only(bottom: 8),
+                            child: Row(
+                              children: [
+                                Icon(Icons.star_rounded, size: 14, color: grad[0]),
+                                const SizedBox(width: 4),
+                                Text(
+                                  'FEATURED',
+                                  style: TextStyle(
+                                    fontSize: 10,
+                                    fontWeight: FontWeight.w800,
+                                    letterSpacing: 1.1,
+                                    color: grad[0],
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                          decoration: BoxDecoration(
+                            color: grad[0].withValues(alpha: isDark ? 0.2 : 0.12),
+                            borderRadius: BorderRadius.circular(5),
+                          ),
+                          child: Text(
+                            p.badge.toUpperCase(),
+                            style: TextStyle(
+                              fontSize: 10,
+                              fontWeight: FontWeight.w700,
+                              letterSpacing: 1.2,
+                              color: grad[0],
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 10),
+                        Text(p.name, style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 17)),
+                        if (p.subtitle.isNotEmpty) ...[
+                          const SizedBox(height: 4),
+                          Text(
+                            p.subtitle,
+                            style: TextStyle(fontSize: 13, color: grad[0].withValues(alpha: 0.95), fontWeight: FontWeight.w500),
+                          ),
+                        ],
+                        const SizedBox(height: 8),
+                        Text(
+                          p.desc,
+                          style: const TextStyle(color: kMutedColor, height: 1.45, fontSize: 14),
+                          maxLines: 4,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                        if (p.stats.isNotEmpty) ...[
+                          const SizedBox(height: 12),
+                          ProjectStatsRow(stats: p.stats, accent: grad[0]),
+                        ],
+                        const SizedBox(height: 10),
+                        Wrap(spacing: 6, runSpacing: 6, children: p.tags.map((t) => SkillTag(t)).toList()),
+                        const Spacer(),
+                        if (links.isNotEmpty) ...[
+                          const SizedBox(height: 12),
+                          ProjectLinksRow(links: links, accent: grad[0], onOpen: _openLink),
+                        ],
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// Stats row like the reference portfolio (downloads, rating, etc.).
+class ProjectStatsRow extends StatelessWidget {
+  const ProjectStatsRow({super.key, required this.stats, required this.accent});
+  final List<ProjectStat> stats;
+  final Color accent;
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: stats.asMap().entries.map((e) {
+        final s = e.value;
+        final isLast = e.key == stats.length - 1;
+        return Expanded(
+          child: Row(
+            children: [
+              Expanded(
+                child: Container(
+                  padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 8),
+                  decoration: BoxDecoration(
+                    color: accent.withValues(alpha: 0.08),
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(color: accent.withValues(alpha: 0.2)),
+                  ),
+                  child: Column(
+                    children: [
+                      Text(s.value, style: TextStyle(fontSize: 16, fontWeight: FontWeight.w800, color: accent)),
+                      Text(s.label, style: const TextStyle(fontSize: 11, color: kMutedColor)),
+                    ],
+                  ),
+                ),
+              ),
+              if (!isLast) const SizedBox(width: 8),
+            ],
+          ),
+        );
+      }).toList(),
+    );
+  }
+}
+
+/// Play Store / website link buttons (reference-style).
+class ProjectLinksRow extends StatelessWidget {
+  const ProjectLinksRow({super.key, required this.links, required this.accent, required this.onOpen});
+  final List<ProjectLink> links;
+  final Color accent;
+  final Future<void> Function(String url) onOpen;
+
+  @override
+  Widget build(BuildContext context) {
+    return Wrap(
+      spacing: 8,
+      runSpacing: 8,
+      children: links.map((link) {
+        return OutlinedButton.icon(
+          onPressed: () => onOpen(link.url),
+          icon: Icon(Icons.open_in_new_rounded, size: 15, color: accent),
+          label: Text(link.label),
+          style: OutlinedButton.styleFrom(
+            foregroundColor: accent,
+            side: BorderSide(color: accent.withValues(alpha: 0.45)),
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+            textStyle: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600),
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+          ),
+        );
+      }).toList(),
     );
   }
 }
@@ -760,10 +1205,24 @@ class SkillsSection extends StatelessWidget {
         return Column(children: [for (var i = 0; i < groups.length; i++) Padding(padding: const EdgeInsets.only(bottom: 12), child: SkillGroupCard(title: groups[i].title, tags: groups[i].tags).animate().fadeIn(delay: (50 + i * 45).ms, duration: 450.ms).slideY(begin: 0.08, end: 0, curve: Curves.easeOutCubic))]);
       }),
       const SizedBox(height: 24),
-      Wrap(spacing: 12, runSpacing: 12, children: [
-        for (var i = 0; i < kMetrics.length; i++)
-          MetricCard(value: kMetrics[i].value, label: kMetrics[i].label).animate().fadeIn(delay: (200 + i * 80).ms, duration: 500.ms, curve: Curves.easeOutCubic).scale(begin: const Offset(0.92, 0.92), curve: Curves.easeOutBack),
-      ]),
+      LayoutBuilder(builder: (context, c) {
+        final itemW = c.maxWidth < 400 ? (c.maxWidth - 12) / 2 : 130.0;
+        return Wrap(
+          spacing: 12,
+          runSpacing: 12,
+          alignment: WrapAlignment.center,
+          children: [
+            for (var i = 0; i < kMetrics.length; i++)
+              SizedBox(
+                width: itemW,
+                child: MetricCard(value: kMetrics[i].value, label: kMetrics[i].label)
+                    .animate()
+                    .fadeIn(delay: (200 + i * 80).ms, duration: 500.ms, curve: Curves.easeOutCubic)
+                    .scale(begin: const Offset(0.92, 0.92), curve: Curves.easeOutBack),
+              ),
+          ],
+        );
+      }),
     ]);
   }
 }
@@ -791,7 +1250,7 @@ class MetricCard extends StatelessWidget {
   const MetricCard({super.key, required this.value, required this.label});
   final String value, label;
   @override
-  Widget build(BuildContext context) => SizedBox(width: 130, child: Card(
+  Widget build(BuildContext context) => Card(
     color: const Color(0x263DD6C6),
     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12), side: const BorderSide(color: Color(0x403DD6C6))),
     child: Padding(padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 8), child: Column(children: [
@@ -799,7 +1258,7 @@ class MetricCard extends StatelessWidget {
       const SizedBox(height: 4),
       Text(label, textAlign: TextAlign.center, style: const TextStyle(fontSize: 12, color: kMutedColor)),
     ])),
-  ));
+  );
 }
 
 class EducationSection extends StatelessWidget {
@@ -858,7 +1317,7 @@ class ContactCard extends StatelessWidget {
     final items = [
       (Icons.mail_outline_rounded, 'Email', kPortfolioEmail, onEmail),
       (Icons.phone_outlined, 'Phone', kPortfolioPhoneDisplay, onPhone),
-      (Icons.work_outline_rounded, 'LinkedIn', 'linkedin.com/in/aliusmankhan077', onLinkedIn),
+      (Icons.work_outline_rounded, 'LinkedIn', kPortfolioLinkedInDisplay, onLinkedIn),
       (Icons.code_rounded, 'GitHub', 'github.com/$kPortfolioGithubUser', onGithub),
       (Icons.location_on_outlined, 'Location', kPortfolioLocation, () {}),
     ];
@@ -919,6 +1378,18 @@ class WhyCard extends StatelessWidget {
         const SizedBox(width: 12),
         Expanded(child: Text(e.value, style: TextStyle(color: muted, height: 1.5, fontSize: 14))),
       ]))),
+      const SizedBox(height: 8),
+      Divider(color: cs.onSurface.withValues(alpha: 0.12)),
+      const SizedBox(height: 12),
+      Text(
+        '“$kRecommendationQuote”',
+        style: TextStyle(color: muted.withValues(alpha: 0.9), height: 1.55, fontSize: 13, fontStyle: FontStyle.italic),
+      ),
+      const SizedBox(height: 6),
+      Text(
+        '— Abdul Samad Tayyab · LinkedIn recommendation',
+        style: TextStyle(color: cs.primary.withValues(alpha: 0.85), fontSize: 12, fontWeight: FontWeight.w600),
+      ),
     ]))));
   }
 }
@@ -947,7 +1418,7 @@ class PortfolioFooter extends StatelessWidget {
           SocialIconBtn(tooltip: 'Email', icon: Icons.mail_outline_rounded, onTap: onEmail),
         ]),
         const SizedBox(height: 20),
-        Text('© ${DateTime.now().year} $kHeroName · Built with Flutter', textAlign: TextAlign.center, style: const TextStyle(color: kMutedColor, fontSize: 13)),
+        Text('© ${DateTime.now().year} $kHeroName · Android Developer', textAlign: TextAlign.center, style: const TextStyle(color: kMutedColor, fontSize: 13)),
       ]),
     );
   }
