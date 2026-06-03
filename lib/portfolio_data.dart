@@ -24,7 +24,7 @@ const String kHeroStatsLine =
     '4+ years · 25+ apps delivered · Compose · MVVM · Clean Architecture';
 
 /// Shown under the hero name — signals availability to recruiters.
-const String kAvailabilityLabel = 'Open to Android roles · Full-time · Remote · Islamabad';
+const String kAvailabilityLabel = 'Open to Android roles · Full-time · Remote';
 
 /// Quick-scan tech stack for recruiters (hero chip row).
 const List<String> kCoreTechnologies = [
